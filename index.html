@@ -194,7 +194,7 @@ input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
 <div class="card"><h3>Backup</h3><p class="muted">Download your complete timetable data and restore it later.</p><div class="toolbar"><button class="primary-btn" onclick="exportData()">Download Backup</button><label class="secondary-btn">Restore Backup<input type="file" accept=".json" style="display:none" onchange="restoreData(event)"></label><button class="danger-btn" onclick="resetData()">Reset All Data</button></div></div>
 </section>
 
-<div class="footer">Kyidsa Primary School &nbsp; | &nbsp; School Timetable Manager &nbsp; <span style="float:right">v4.0</span></div>
+<div class="footer">Kyidsa Primary School &nbsp; | &nbsp; School Timetable Manager &nbsp; <span style="float:right">v5.0</span></div>
 </div></main></div>
 
 <div id="teacherModal" class="modal-bg"><div class="modal"><h3 id="teacherModalTitle">Add Teacher</h3><div class="form-grid"><div class="form-group full"><label>Teacher Name</label><input id="tName" placeholder="Enter teacher name"></div><div class="form-group"><label>Main Subject</label><input id="tSubject" placeholder="Example: Dzongkha"></div><div class="form-group"><label>Maximum Periods / Day</label><input id="tMax" type="number" value="6"></div><div class="form-group"><label>Blocked Day (Optional)</label><select id="tDay"></select></div><div class="form-group"><label>Blocked Period (Optional)</label><input id="tPeriod" type="number" min="1"></div></div><div class="modal-actions"><button class="secondary-btn" onclick="closeModal('teacherModal')">Cancel</button><button class="primary-btn" style="padding:11px 18px" onclick="saveTeacher()">Save Teacher</button></div></div></div>
@@ -256,14 +256,122 @@ function removeClassTeacher(i){
 function addAllocation(){let className=aClass.value,subject=aSubject.value,teacher=aTeacher.value,periods=Number(aPeriods.value),resource=aResource.value.trim();if(!className||!subject||!teacher||periods<1)return alert('Complete all fields.');S.allocations.push({className,subject,teacher,periodsPerWeek:periods,resource});aResource.value='';save();refreshAll()}
 function renderAllocations(){let el=document.getElementById('allocationTable');el.innerHTML=S.allocations.length?`<div class="table-wrap"><table><tr><th>Class</th><th>Subject</th><th>Teacher</th><th>Periods/Week</th><th>Resource</th><th>Action</th></tr>${S.allocations.map((a,i)=>`<tr><td>${a.className}</td><td><b>${a.subject}</b></td><td>${a.teacher}</td><td>${a.periodsPerWeek}</td><td>${a.resource||'—'}</td><td><button class="icon-btn delete" onclick="S.allocations.splice(${i},1);save();refreshAll()">🗑</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No subject allocations yet.</div>'}
 function updateDays(){S.days=Number(dayCount.value)===6?['Mon','Tue','Wed','Thu','Fri','Sat']:['Mon','Tue','Wed','Thu','Fri'];save();fillSelectors()}
-function K(d,p){return d+'-P'+p} function T(n){return S.teachers.find(x=>x.name===n)}
-function classSlots(c){let a=[];S.days.forEach(d=>{for(let p=1;p<=c.periodsPerDay;p++)a.push({day:d,p,key:K(d,p)})});return a}
-function teacherBusy(s,t,slot){return S.classes.some(c=>s[c.name]?.[slot.key]?.teacher===t)}
-function resourceBusy(s,r,slot){return r&&S.classes.some(c=>s[c.name]?.[slot.key]?.resource===r)}
-function loadDay(s,t,d){let n=0;S.classes.forEach(c=>Object.entries(s[c.name]||{}).forEach(([k,v])=>{if(k.startsWith(d+'-')&&v.teacher===t)n++}));return n}
-function sameDaySubject(s,c,d,sub){return Object.entries(s[c]||{}).filter(([k,v])=>k.startsWith(d+'-')&&v.subject===sub).length}
-function generate(){if(!S.teachers.length||!S.classes.length||!S.subjects.length||!S.allocations.length)return message('Please add teachers, classes, subjects and allocations first.','warn');let req=[];S.allocations.forEach(a=>{for(let i=0;i<a.periodsPerWeek;i++)req.push({...a})});let attempts=Number(attempts.value)||1000,best,bestUn=1e9;for(let z=0;z<attempts;z++){let s={};S.classes.forEach(c=>s[c.name]={});let un=[];for(let a of [...req].sort(()=>Math.random()-.5)){let c=S.classes.find(x=>x.name===a.className),t=T(a.teacher),cand=classSlots(c).filter(sl=>!s[a.className][sl.key]&&t.blocked!==sl.key&&!teacherBusy(s,a.teacher,sl)&&!resourceBusy(s,a.resource,sl)&&loadDay(s,a.teacher,sl.day)<t.maxDaily);if(!cand.length){un.push(a);continue}cand.sort((x,y)=>(sameDaySubject(s,a.className,x.day,a.subject)+Math.random())-(sameDaySubject(s,a.className,y.day,a.subject)+Math.random()));let sl=cand[0];s[a.className][sl.key]={subject:a.subject,teacher:a.teacher,resource:a.resource||''}}if(un.length<bestUn){best=s;bestUn=un.length;if(!bestUn)break}}S.schedule=best||{};save();refreshAll();checkClashes();message(bestUn?`Generated timetable, but ${bestUn} lesson(s) could not be placed.`:'Timetable generated successfully with no unplaced lessons.',bestUn?'warn':'ok')}
-function message(m,t){generateMessage.innerHTML=`<div class="notice ${t}">${m}</div>`}
+function K(d,p){return d+'-P'+p}
+function T(n){return S.teachers.find(x=>x.name===n)}
+function classSlots(c){
+  let a=[];
+  for(const d of S.days){for(let p=1;p<=Number(c.periodsPerDay||0);p++)a.push({day:d,p,key:K(d,p)})}
+  return a;
+}
+function teacherBusy(s,t,slot){
+  return S.classes.some(c=>s[c.name]&&s[c.name][slot.key]&&s[c.name][slot.key].teacher===t);
+}
+function resourceBusy(s,r,slot){
+  if(!r)return false;
+  return S.classes.some(c=>s[c.name]&&s[c.name][slot.key]&&s[c.name][slot.key].resource===r);
+}
+function loadDay(s,t,d){
+  let n=0;
+  S.classes.forEach(c=>Object.entries(s[c.name]||{}).forEach(([k,v])=>{if(k.startsWith(d+'-')&&v.teacher===t)n++}));
+  return n;
+}
+function sameDaySubject(s,c,d,sub){
+  return Object.entries(s[c]||{}).filter(([k,v])=>k.startsWith(d+'-')&&v.subject===sub).length;
+}
+function validateBeforeGenerate(){
+  const errors=[];
+  if(!S.teachers.length)errors.push('Add at least one teacher.');
+  if(!S.classes.length)errors.push('Add at least one class.');
+  if(!S.subjects.length)errors.push('Add at least one subject.');
+  if(!S.allocations.length)errors.push('Add subject allocations.');
+  S.allocations.forEach((a,i)=>{
+    if(!S.classes.some(c=>c.name===a.className))errors.push(`Allocation ${i+1}: class "${a.className}" does not exist.`);
+    if(!S.teachers.some(t=>t.name===a.teacher))errors.push(`Allocation ${i+1}: teacher "${a.teacher}" does not exist.`);
+    if(!Number(a.periodsPerWeek)||Number(a.periodsPerWeek)<1)errors.push(`Allocation ${i+1}: periods per week must be at least 1.`);
+  });
+  return errors;
+}
+function generate(){
+  try{
+    const errors=validateBeforeGenerate();
+    if(errors.length){
+      const box=document.getElementById('generateMessage');
+      if(box)box.innerHTML=`<div class="notice bad"><b>Cannot generate timetable:</b><br>${errors.join('<br>')}</div>`;
+      return;
+    }
+    const attemptInput=document.getElementById('attempts');
+    const attemptCount=Math.max(1,Math.min(5000,Number(attemptInput?attemptInput.value:1000)||1000));
+    const spreadInput=document.getElementById('spread');
+    const avoidRepeat=!spreadInput || spreadInput.value==='yes';
+
+    const requests=[];
+    S.allocations.forEach(a=>{
+      for(let i=0;i<Number(a.periodsPerWeek);i++) requests.push({...a});
+    });
+
+    // Harder teachers/allocations are placed first. Random restarts improve results.
+    const difficulty=(a)=>{
+      const c=S.classes.find(x=>x.name===a.className);
+      const t=T(a.teacher);
+      const slots=(c?classSlots(c):[]).length;
+      const max=t?Number(t.maxDaily||99)*S.days.length:0;
+      return Math.min(slots,max)+Math.random()*0.01;
+    };
+
+    let bestSchedule=null;
+    let bestUnplaced=requests.length+1;
+
+    for(let attempt=0;attempt<attemptCount;attempt++){
+      const schedule={};
+      S.classes.forEach(c=>schedule[c.name]={});
+      const unplaced=[];
+      const order=[...requests].sort((a,b)=>difficulty(a)-difficulty(b));
+
+      for(const a of order){
+        const c=S.classes.find(x=>x.name===a.className);
+        const t=T(a.teacher);
+        if(!c||!t){unplaced.push(a);continue;}
+        let candidates=classSlots(c).filter(sl=>{
+          if(schedule[a.className][sl.key])return false;
+          if((t.blocked||'')===sl.key)return false;
+          if(teacherBusy(schedule,a.teacher,sl))return false;
+          if(resourceBusy(schedule,a.resource||'',sl))return false;
+          if(loadDay(schedule,a.teacher,sl.day)>=Number(t.maxDaily||99))return false;
+          return true;
+        });
+        if(!candidates.length){unplaced.push(a);continue;}
+
+        candidates.sort((x,y)=>{
+          const sx=(avoidRepeat?sameDaySubject(schedule,a.className,x.day,a.subject)*100:0)+loadDay(schedule,a.teacher,x.day)*10+Math.random();
+          const sy=(avoidRepeat?sameDaySubject(schedule,a.className,y.day,a.subject)*100:0)+loadDay(schedule,a.teacher,y.day)*10+Math.random();
+          return sx-sy;
+        });
+        const slot=candidates[0];
+        schedule[a.className][slot.key]={subject:a.subject,teacher:a.teacher,resource:a.resource||''};
+      }
+
+      if(unplaced.length<bestUnplaced){
+        bestSchedule=schedule;
+        bestUnplaced=unplaced.length;
+        if(bestUnplaced===0)break;
+      }
+    }
+
+    S.schedule=bestSchedule||{};
+    save();
+    refreshAll();
+    checkClashes();
+    const placed=Object.values(S.schedule).reduce((n,x)=>n+Object.keys(x||{}).length,0);
+    const total=requests.length;
+    message(bestUnplaced===0
+      ?`Timetable generated successfully. ${placed} of ${total} lessons were placed with no teacher clashes.`
+      :`Timetable generated. ${placed} of ${total} lessons were placed. ${bestUnplaced} lesson(s) could not be placed because of available periods or workload limits.`,bestUnplaced?'warn':'ok');
+  }catch(err){
+    console.error(err);
+    message('Generation error: '+(err&&err.message?err.message:String(err)),'bad');
+  }
+}
+function message(m,t){const el=document.getElementById('generateMessage');if(el)el.innerHTML=`<div class="notice ${t}">${m}</div>`}
 function clearSchedule(){if(confirm('Clear current timetable?')){S.schedule={};S.substitutions=[];save();refreshAll()}}
 function checkClashes(){let issues=[],map={};S.classes.forEach(c=>Object.entries(S.schedule[c.name]||{}).forEach(([slot,x])=>{(map[slot]??=[]).push({className:c.name,...x})}));Object.entries(map).forEach(([slot,a])=>{let m={};a.forEach(x=>(m[x.teacher]??=[]).push(x));Object.entries(m).forEach(([t,z])=>{if(z.length>1)issues.push(`${t} has a double booking at ${slot}`)})});clashBox.innerHTML=issues.length?`<div class="notice bad">${issues.join('<br>')}</div>`:'<div class="notice ok">No teacher clashes found.</div>'}
 function showAbsentLesson(){let t=absTeacher.value,d=subDay.value,p=Number(subPeriod.value),lessons=[];S.classes.forEach(c=>{let x=S.schedule[c.name]?.[K(d,p)];if(x?.teacher===t)lessons.push({className:c.name,...x})});if(!lessons.length){subSuggestion.innerHTML='<div class="notice warn">This teacher has no lesson in the selected period.</div>';return}let x=lessons[0],cand=S.teachers.filter(a=>a.name!==t&&a.blocked!==K(d,p)&&!teacherBusy(S.schedule,a.name,{key:K(d,p)})).map(a=>({a,match:S.allocations.some(z=>z.teacher===a.name&&z.subject===x.subject),load:S.allocations.filter(z=>z.teacher===a.name).reduce((n,z)=>n+z.periodsPerWeek,0)})).sort((a,b)=>(b.match-a.match)||(a.load-b.load));subSuggestion.innerHTML=`<div class="notice ok"><b>Absent lesson:</b> Class ${x.className} · ${x.subject}<div class="table-wrap" style="margin-top:12px"><table><tr><th>Rank</th><th>Teacher</th><th>Subject Match</th><th>Weekly Load</th><th>Action</th></tr>${cand.map((q,i)=>`<tr><td>${i+1}</td><td><b>${q.a.name}</b></td><td>${q.match?'Yes':'No'}</td><td>${q.load}</td><td><button class="secondary-btn" onclick="assignSub('${q.a.name.replace(/'/g,"\\'")}','${t.replace(/'/g,"\\'")}','${d}',${p},'${x.className}','${x.subject}')">Assign</button></td></tr>`).join('')}</table></div></div>`}
@@ -275,7 +383,7 @@ function exportData(){let b=new Blob([JSON.stringify(S,null,2)],{type:'applicati
 function restoreData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{S=JSON.parse(r.result);save();refreshAll();alert('Backup restored successfully.')}catch{alert('Invalid backup file.')}};r.readAsText(f)}
 function resetData(){if(confirm('Remove all data?')){S={days:['Mon','Tue','Wed','Thu','Fri'],teachers:[],classes:[],subjects:[],allocations:[],schedule:{},substitutions:[]};save();refreshAll()}}
 function refreshStats(){stTeachers.textContent=S.teachers.length;stClasses.textContent=S.classes.length;stSubjects.textContent=S.subjects.length;stLessons.textContent=Object.values(S.schedule).reduce((n,x)=>n+Object.keys(x||{}).length,0)}
-function refreshAll(){S.classes.forEach(c=>{if(typeof c.classTeacher==='undefined')c.classTeacher=''});fillSelectors();renderTeachers();renderClasses();renderClassTeachers();renderSubjects();renderAllocations();renderSubRecords();refreshStats()}
+function refreshAll(){S.classes.forEach(c=>{if(typeof c.classTeacher==='undefined')c.classTeacher=''});S.teachers.forEach(t=>{if(!Number(t.maxDaily)||Number(t.maxDaily)<1)t.maxDaily=99;if(typeof t.blocked==='undefined')t.blocked=''});fillSelectors();renderTeachers();renderClasses();renderClassTeachers();renderSubjects();renderAllocations();renderSubRecords();refreshStats()}
 load();refreshAll();
 </script>
 </body>
