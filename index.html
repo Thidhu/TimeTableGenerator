@@ -79,6 +79,7 @@ input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
 @media(max-width:1000px){.sidebar{width:74px;padding:16px 9px}.school-brand h1,.school-brand p,.nav-label,.nav-arrow{display:none}.school-brand{padding-bottom:16px}.nav-item{justify-content:center;padding:13px}.main{margin-left:74px;width:calc(100% - 74px)}.tooltip{display:none!important}.g4{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){.content{padding:20px}.page-heading{align-items:flex-start;flex-direction:column}.page-heading h2{font-size:32px}.g4,.g3,.g2,.form-grid{grid-template-columns:1fr}.topbar{padding:0 18px}.top-title{font-size:16px}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -191,10 +192,19 @@ input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
 
 <section id="settings" class="page">
 <div class="eyebrow">System</div><div class="page-heading"><div><h2>Settings</h2><p>Manage and protect your timetable data.</p></div></div>
+<div class="card">
+<h3>Import Existing Excel Timetable</h3>
+<p class="muted">Import your current Kyidsa Excel timetable. The system will read each Class PP to Class VI sheet and automatically create class, teacher, subject and lesson data.</p>
+<div class="toolbar">
+<label class="primary-btn" style="display:inline-flex;align-items:center;cursor:pointer">📥 Import Excel Timetable<input id="excelImport" type="file" accept=".xlsx,.xls" style="display:none" onchange="importExcelTimetable(event)"></label>
+<button class="secondary-btn" onclick="checkClashes()">Check Imported Timetable for Clashes</button>
+</div>
+<div id="importStatus" class="muted">No Excel file imported in this session.</div>
+</div>
 <div class="card"><h3>Backup</h3><p class="muted">Download your complete timetable data and restore it later.</p><div class="toolbar"><button class="primary-btn" onclick="exportData()">Download Backup</button><label class="secondary-btn">Restore Backup<input type="file" accept=".json" style="display:none" onchange="restoreData(event)"></label><button class="danger-btn" onclick="resetData()">Reset All Data</button></div></div>
 </section>
 
-<div class="footer">Kyidsa Primary School &nbsp; | &nbsp; School Timetable Manager &nbsp; <span style="float:right">v5.0</span></div>
+<div class="footer">Kyidsa Primary School &nbsp; | &nbsp; School Timetable Manager &nbsp; <span style="float:right">v6.0</span></div>
 </div></main></div>
 
 <div id="teacherModal" class="modal-bg"><div class="modal"><h3 id="teacherModalTitle">Add Teacher</h3><div class="form-grid"><div class="form-group full"><label>Teacher Name</label><input id="tName" placeholder="Enter teacher name"></div><div class="form-group"><label>Main Subject</label><input id="tSubject" placeholder="Example: Dzongkha"></div><div class="form-group"><label>Maximum Periods / Day</label><input id="tMax" type="number" value="6"></div><div class="form-group"><label>Blocked Day (Optional)</label><select id="tDay"></select></div><div class="form-group"><label>Blocked Period (Optional)</label><input id="tPeriod" type="number" min="1"></div></div><div class="modal-actions"><button class="secondary-btn" onclick="closeModal('teacherModal')">Cancel</button><button class="primary-btn" style="padding:11px 18px" onclick="saveTeacher()">Save Teacher</button></div></div></div>
@@ -379,6 +389,135 @@ function assignSub(sub,abs,day,period,className,subject){S.substitutions.push({s
 function renderSubRecords(){let e=subRecords;if(!e)return;e.innerHTML=S.substitutions.length?`<div class="table-wrap"><table><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Substitute</th></tr>${S.substitutions.map(x=>`<tr><td>${x.day}</td><td>P${x.period}</td><td>${x.className}</td><td>${x.subject}</td><td>${x.absent}</td><td><b>${x.substitute}</b></td></tr>`).join('')}</table></div>`:'<div class="empty">No substitutions recorded.</div>'}
 function renderClassReport(){let n=reportClass.value,c=S.classes.find(x=>x.name===n);if(!c)return;let s=S.schedule[n]||{},ct=c.classTeacher?`<span class="muted">Class Teacher: <b>${c.classTeacher}</b></span>`:'<span class="muted">Class Teacher: Not assigned</span>',h=`<h3>Class ${n}</h3><div style="margin-bottom:14px">${ct}</div><div class="table-wrap"><table class="timetable"><tr><th>Day</th>`;for(let p=1;p<=c.periodsPerDay;p++)h+=`<th>P${p}</th>`;h+='</tr>';S.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=c.periodsPerDay;p++){let x=s[K(d,p)];h+=`<td>${x?`<div class="lesson">${x.subject}</div><div class="teacher-small">${x.teacher}</div>`:'<span class="muted">Free</span>'}</td>`}h+='</tr>'});reportArea.innerHTML=h+'</table></div>'}
 function renderTeacherReport(){let t=reportTeacher.value,max=Math.max(1,...S.classes.map(c=>c.periodsPerDay)),h=`<h3>${t}</h3><div class="table-wrap"><table class="timetable"><tr><th>Day</th>`;for(let p=1;p<=max;p++)h+=`<th>P${p}</th>`;h+='</tr>';S.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=max;p++){let f=null;S.classes.forEach(c=>{let x=S.schedule[c.name]?.[K(d,p)];if(x?.teacher===t)f={...x,className:c.name}});h+=`<td>${f?`<div class="lesson">${f.className} · ${f.subject}</div>`:'<span class="muted">Free</span>'}</td>`}h+='</tr>'});reportArea.innerHTML=h+'</table></div>'}
+
+function cleanText(v){
+  if(v===undefined||v===null) return '';
+  return String(v).replace(/\r/g,'').trim();
+}
+function addUnique(arr,v){
+  if(v && !arr.includes(v)) arr.push(v);
+}
+function parseLessonCell(value){
+  let raw=cleanText(value);
+  if(!raw) return null;
+  let lines=raw.split('\n').map(x=>x.trim()).filter(Boolean);
+  if(!lines.length) return null;
+  let teacher='';
+  let subject='';
+  // The uploaded Kyidsa format normally has subject on first line and teacher on last line.
+  if(lines.length===1){
+    subject=lines[0];
+  }else{
+    subject=lines[0];
+    teacher=lines[lines.length-1];
+    // Library entries such as "Library / (English) / Teacher"
+    if(lines.length>=3 && /^\(.*\)$/.test(lines[1])) subject += ' ' + lines[1];
+  }
+  return {subject,teacher,raw};
+}
+async function importExcelTimetable(event){
+  const file=event.target.files[0];
+  if(!file) return;
+  const status=document.getElementById('importStatus');
+  try{
+    if(typeof XLSX==='undefined'){
+      status.innerHTML='<div class="notice bad">Excel import library could not load. Please check your internet connection and reopen the tool.</div>';
+      return;
+    }
+    status.innerHTML='<div class="notice warn">Reading Excel timetable...</div>';
+    const buffer=await file.arrayBuffer();
+    const wb=XLSX.read(buffer,{type:'array',cellText:true,cellDates:false});
+    const classSheets=wb.SheetNames.filter(n=>/^Class\s+(PP|I|II|III|IV|V|VI)$/i.test(n.trim()));
+    if(!classSheets.length){
+      status.innerHTML='<div class="notice bad">No class timetable sheets were found. Expected sheets such as Class PP, Class I, Class II, etc.</div>';
+      return;
+    }
+    // Replace only timetable-related data, while preserving the current school days where possible.
+    let imported={days:[],teachers:[],classes:[],subjects:[],allocations:[],schedule:{},substitutions:[]};
+    let teacherSubjects={};
+    let totalLessons=0, warnings=[];
+    for(const sheetName of classSheets){
+      const ws=wb.Sheets[sheetName];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      // Find the timetable header row containing "Day / Period"
+      let headerIndex=-1;
+      for(let r=0;r<rows.length;r++){
+        if(cleanText(rows[r][0]).toLowerCase().includes('day') && cleanText(rows[r][0]).toLowerCase().includes('period')){
+          headerIndex=r; break;
+        }
+      }
+      if(headerIndex<0){warnings.push(sheetName+': timetable header not found');continue;}
+      const className=sheetName.replace(/^Class\s+/i,'').trim();
+      const headers=rows[headerIndex];
+      const periods=[];
+      for(let c=1;c<headers.length;c++){
+        let h=cleanText(headers[c]);
+        let m=h.match(/P\s*(\d+)/i);
+        if(m) periods.push({col:c,period:Number(m[1])});
+      }
+      if(!periods.length){warnings.push(sheetName+': no period columns found');continue;}
+      const periodsPerDay=Math.max(...periods.map(x=>x.period));
+      imported.classes.push({name:className,periodsPerDay,classTeacher:''});
+      imported.schedule[className]={};
+      for(let r=headerIndex+1;r<rows.length;r++){
+        const day=cleanText(rows[r][0]);
+        if(!day) continue;
+        // Accept standard day abbreviations/names and stop when table ends
+        if(!/^(Mon|Tue|Wed|Thu|Fri|Sat|Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)$/i.test(day)) continue;
+        let shortDay=day.slice(0,3);
+        addUnique(imported.days,shortDay);
+        for(const pc of periods){
+          const parsed=parseLessonCell(rows[r][pc.col]);
+          if(!parsed) continue;
+          const key=shortDay+'-P'+pc.period;
+          imported.schedule[className][key]={subject:parsed.subject,teacher:parsed.teacher||'',resource:''};
+          addUnique(imported.subjects,parsed.subject);
+          if(parsed.teacher){
+            addUnique(imported.teachers,parsed.teacher);
+            if(!teacherSubjects[parsed.teacher]) teacherSubjects[parsed.teacher]=[];
+            addUnique(teacherSubjects[parsed.teacher],parsed.subject);
+          }else{
+            warnings.push(sheetName+' '+shortDay+' P'+pc.period+': teacher name not found');
+          }
+          totalLessons++;
+        }
+      }
+    }
+    imported.teachers=imported.teachers.map(name=>({
+      name,
+      subject:(teacherSubjects[name]||[]).slice(0,3).join(', '),
+      maxDaily:99,
+      blocked:''
+    }));
+    // Create allocations from imported lesson counts
+    let allocationMap={};
+    for(const c of imported.classes){
+      Object.values(imported.schedule[c.name]||{}).forEach(x=>{
+        const k=c.name+'|'+x.subject+'|'+x.teacher;
+        allocationMap[k]=(allocationMap[k]||0)+1;
+      });
+    }
+    imported.allocations=Object.entries(allocationMap).map(([k,count])=>{
+      const [className,subject,teacher]=k.split('|');
+      return {className,subject,teacher,periodsPerWeek:count,resource:''};
+    });
+    if(!imported.days.length) imported.days=['Mon','Tue','Wed','Thu','Fri'];
+    const oldSubs=S.substitutions||[];
+    S={...imported,substitutions:oldSubs};
+    save();
+    refreshAll();
+    let msg=`Imported successfully: <b>${imported.classes.length}</b> classes, <b>${imported.teachers.length}</b> teachers, <b>${imported.subjects.length}</b> subjects and <b>${totalLessons}</b> timetable lessons.`;
+    if(warnings.length) msg+=`<br><br><b>Import notes:</b><br>${warnings.slice(0,10).join('<br>')}${warnings.length>10?'<br>...and '+(warnings.length-10)+' more.':''}`;
+    status.innerHTML='<div class="notice '+(warnings.length?'warn':'ok')+'">'+msg+'</div>';
+    checkClashes();
+    alert('Excel timetable imported successfully. You can now check reports, clashes and substitution.');
+  }catch(err){
+    console.error(err);
+    status.innerHTML='<div class="notice bad"><b>Import failed:</b> '+String(err.message||err)+'</div>';
+  }finally{
+    event.target.value='';
+  }
+}
 function exportData(){let b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='school-timetable-backup.json';a.click()}
 function restoreData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{S=JSON.parse(r.result);save();refreshAll();alert('Backup restored successfully.')}catch{alert('Invalid backup file.')}};r.readAsText(f)}
 function resetData(){if(confirm('Remove all data?')){S={days:['Mon','Tue','Wed','Thu','Fri'],teachers:[],classes:[],subjects:[],allocations:[],schedule:{},substitutions:[]};save();refreshAll()}}
