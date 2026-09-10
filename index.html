@@ -6,262 +6,277 @@
 <title>School Timetable Manager</title>
 <style>
 :root{
-  --primary:#1f4b99;--primary2:#16366f;--bg:#f4f7fb;--card:#ffffff;
-  --text:#172033;--muted:#667085;--border:#e2e8f0;--success:#16794b;
-  --danger:#c23b3b;--warning:#b7791f;--sidebar:#102a56;
+ --navy:#112d59; --navy2:#173d78; --blue:#2468c4; --blue2:#1b56a5;
+ --bg:#f5f7fb; --card:#ffffff; --text:#1f2d42; --muted:#69768a;
+ --line:#e2e8f0; --green:#198754; --red:#dc3545; --amber:#b7791f;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
-.app{display:flex;min-height:100vh}
-.sidebar{width:250px;background:var(--sidebar);color:#fff;padding:22px 14px;position:fixed;inset:0 auto 0 0}
-.brand{padding:4px 12px 24px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:16px}
-.brand h1{font-size:19px;margin:0 0 6px}.brand p{font-size:12px;margin:0;opacity:.75;line-height:1.4}
-.nav button{width:100%;border:0;background:transparent;color:#dbe7ff;text-align:left;padding:12px;border-radius:9px;margin:3px 0;font-size:14px;cursor:pointer}
-.nav button:hover,.nav button.active{background:#28549a;color:#fff}
-.main{margin-left:250px;width:calc(100% - 250px);padding:26px;max-width:1800px}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
-.topbar h2{margin:0;font-size:25px}.topbar p{margin:5px 0 0;color:var(--muted);font-size:13px}
+body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.app{min-height:100vh;display:flex}
+.sidebar{
+ width:245px;position:fixed;inset:0 auto 0 0;background:linear-gradient(180deg,#153664,#102a52);
+ color:#fff;padding:24px 14px;z-index:20;box-shadow:4px 0 18px rgba(16,42,82,.08)
+}
+.school-brand{text-align:center;padding:8px 10px 24px;border-bottom:1px solid rgba(255,255,255,.13);margin-bottom:16px}
+.school-logo{font-size:36px;line-height:1;margin-bottom:10px}
+.school-brand h1{font-size:21px;line-height:1.2;margin:0;font-weight:800}
+.school-brand p{margin:10px 0 0;font-size:12px;color:#d5e2f7;letter-spacing:.4px}
+.nav-item{
+ width:100%;display:flex;align-items:center;gap:15px;color:#dce7f7;background:transparent;border:0;
+ padding:13px 14px;border-radius:13px;margin:5px 0;font-size:15px;font-weight:650;cursor:pointer;
+ position:relative;text-align:left;transition:.18s
+}
+.nav-item:hover{background:rgba(255,255,255,.09);color:#fff}
+.nav-item.active{background:linear-gradient(135deg,#2b72d0,#1d5aab);color:#fff;box-shadow:0 8px 20px rgba(7,25,57,.22)}
+.nav-icon{width:30px;text-align:center;font-size:21px}
+.nav-label{flex:1}.nav-arrow{opacity:.55;font-size:13px}
+.tooltip{
+ position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);
+ min-width:210px;background:#132a4d;color:#fff;border-radius:10px;padding:10px 12px;
+ box-shadow:0 8px 22px rgba(0,0,0,.22);font-size:12px;line-height:1.45;display:none;z-index:50
+}
+.tooltip b{display:block;font-size:13px;margin-bottom:2px}.tooltip:before{
+ content:"";position:absolute;left:-7px;top:50%;transform:translateY(-50%);
+ border-width:7px 7px 7px 0;border-style:solid;border-color:transparent #132a4d transparent transparent
+}
+.nav-item:hover .tooltip{display:block}
+.main{margin-left:245px;width:calc(100% - 245px);min-height:100vh}
+.topbar{
+ height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;
+ justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:10
+}
+.top-left{display:flex;align-items:center;gap:18px}.hamburger{font-size:25px;color:#273b57}
+.top-title{font-size:20px;font-weight:800;border-left:1px solid var(--line);padding-left:18px}
+.admin{display:flex;align-items:center;gap:12px;color:#4b5b72;font-weight:600}.admin-icon{font-size:25px}
+.content{padding:38px;max-width:1550px;margin:auto}
 .page{display:none}.page.active{display:block}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 2px 8px rgba(15,23,42,.035)}
-.card h3{margin:0 0 6px;font-size:17px}.muted{color:var(--muted);font-size:13px;line-height:1.5}
-.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
-.stat{padding:18px;border-radius:12px;background:#fff;border:1px solid var(--border)}.stat b{font-size:28px;display:block;color:var(--primary)}.stat span{font-size:13px;color:var(--muted)}
-label{font-size:12px;font-weight:700;color:#475467;display:block;margin-bottom:6px}
-input,select{width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:14px;color:var(--text)}
-input:focus,select:focus{outline:2px solid #dbe7ff;border-color:#84a5dc}
-button{font-family:inherit}.btn{border:0;background:var(--primary);color:#fff;border-radius:8px;padding:10px 15px;font-weight:700;cursor:pointer;font-size:13px}.btn:hover{background:var(--primary2)}
-.btn.secondary{background:#eef3fb;color:var(--primary)}.btn.success{background:var(--success)}.btn.danger{background:#fff0f0;color:var(--danger)}.btn.small{padding:6px 9px;font-size:12px}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.form-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:end}
-.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:11px 10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle}th{background:#f8fafc;color:#475467;font-size:12px}
-.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#edf3fb;color:var(--primary);font-size:11px;font-weight:700}
-.empty{padding:34px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:10px}
-.notice{padding:12px 14px;border-radius:9px;margin-top:12px;font-size:13px;font-weight:600}.notice.ok{background:#ecfdf3;color:var(--success)}.notice.warn{background:#fffaeb;color:var(--warning)}.notice.bad{background:#fff1f1;color:var(--danger)}
-.timetable td{height:64px;min-width:105px}.lesson{font-weight:700}.teacher{font-size:11px;color:var(--muted);margin-top:4px}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.48);z-index:10;align-items:center;justify-content:center;padding:20px}.modal-bg.show{display:flex}
-.modal{background:#fff;border-radius:15px;padding:22px;width:min(680px,100%);max-height:90vh;overflow:auto}.modal h3{margin-top:0}
-.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.footer-note{font-size:12px;color:var(--muted)}
-@media(max-width:900px){.sidebar{width:70px;padding:14px 8px}.brand h1,.brand p,.nav span{display:none}.nav button{text-align:center}.main{margin-left:70px;width:calc(100% - 70px);padding:16px}.g2,.g3,.g4,.form-grid{grid-template-columns:1fr}.sidebar .brand{padding:8px 0 18px}}
+.eyebrow{font-size:12px;font-weight:800;color:var(--blue2);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px}
+.page-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:26px}
+.page-heading h2{font-size:42px;margin:0 0 7px;letter-spacing:-1px}.page-heading p{font-size:17px;color:var(--muted);margin:0}
+.primary-btn{background:linear-gradient(135deg,#2669c4,#1b54a1);color:#fff;border:0;border-radius:13px;padding:17px 24px;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 10px 22px rgba(31,84,160,.18)}
+.primary-btn:hover{filter:brightness(.96)}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 8px 26px rgba(28,49,79,.05);margin-bottom:20px}
+.card h3{margin:0 0 6px;font-size:18px}.muted{color:var(--muted);font-size:13px;line-height:1.5}
+.grid{display:grid;gap:16px}.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.stat{background:#fff;border:1px solid var(--line);border-radius:15px;padding:21px}.stat strong{font-size:32px;color:var(--blue2);display:block;margin-bottom:5px}.stat span{color:var(--muted);font-size:13px}
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px}.search{flex:1;min-width:230px;position:relative}.search span{position:absolute;left:13px;top:11px;color:#718096}.search input{padding-left:38px}
+input,select{width:100%;border:1px solid #d8e0eb;border-radius:11px;padding:12px 13px;background:#fff;color:var(--text);font-size:14px}
+input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
+.secondary-btn,.danger-btn,.success-btn{border:0;border-radius:9px;padding:10px 13px;font-weight:750;cursor:pointer}
+.secondary-btn{background:#edf3fc;color:#245fae}.danger-btn{background:#fff0f0;color:#c43d45}.success-btn{background:#198754;color:#fff}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:14px 13px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}th{background:#f7f9fc;color:#526174;font-size:12px}tr:last-child td{border-bottom:0}
+.badge{padding:7px 13px;border-radius:999px;font-size:12px;font-weight:800;display:inline-block}.badge.active{background:#e9f8ef;color:#197044}.badge.class{background:#edf4ff;color:#245fae}
+.icon-btn{border:0;border-radius:8px;width:39px;height:39px;cursor:pointer;font-size:17px;margin-right:5px}.edit{background:#edf4ff;color:#1f5cac}.delete{background:#fff0f0;color:#d7333d}
+.empty{padding:35px;text-align:center;color:var(--muted)}
+.notice{margin-top:14px;padding:13px 15px;border-radius:10px;font-size:13px;font-weight:650}.notice.ok{background:#ebfaf1;color:#167645}.notice.warn{background:#fff8e8;color:#a36b0b}.notice.bad{background:#fff0f0;color:#c43d45}
+.pagination{display:flex;justify-content:space-between;align-items:center;margin-top:18px;color:var(--muted);font-size:13px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(12,27,51,.45);z-index:100;align-items:center;justify-content:center;padding:20px}.modal-bg.show{display:flex}
+.modal{width:min(680px,100%);background:#fff;border-radius:18px;padding:25px;box-shadow:0 20px 60px rgba(0,0,0,.25)}.modal h3{margin:0 0 20px;font-size:24px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.form-group label{font-size:12px;font-weight:800;color:#526174;display:block;margin-bottom:7px}.form-group.full{grid-column:1/-1}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.timetable td{min-width:120px;height:70px}.lesson{font-weight:800}.teacher-small{font-size:11px;color:var(--muted);margin-top:4px}
+.footer{border-top:1px solid var(--line);padding:22px;text-align:center;color:#69768a;font-size:13px;margin-top:30px}
+@media(max-width:1000px){.sidebar{width:74px;padding:16px 9px}.school-brand h1,.school-brand p,.nav-label,.nav-arrow{display:none}.school-brand{padding-bottom:16px}.nav-item{justify-content:center;padding:13px}.main{margin-left:74px;width:calc(100% - 74px)}.tooltip{display:none!important}.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.content{padding:20px}.page-heading{align-items:flex-start;flex-direction:column}.page-heading h2{font-size:32px}.g4,.g3,.g2,.form-grid{grid-template-columns:1fr}.topbar{padding:0 18px}.top-title{font-size:16px}}
 </style>
 </head>
 <body>
 <div class="app">
 <aside class="sidebar">
-  <div class="brand"><h1>School Timetable</h1><p>Professional timetable and substitution manager</p></div>
-  <div class="nav">
-    <button class="active" onclick="openPage('dashboard',this)">⌂ <span>Dashboard</span></button>
-    <button onclick="openPage('teachers',this)">♟ <span>Teachers</span></button>
-    <button onclick="openPage('classes',this)">▦ <span>Classes</span></button>
-    <button onclick="openPage('allocations',this)">◫ <span>Subject Allocation</span></button>
-    <button onclick="openPage('generate',this)">⚙ <span>Generate Timetable</span></button>
-    <button onclick="openPage('view',this)">▤ <span>View Timetable</span></button>
-    <button onclick="openPage('substitution',this)">↺ <span>Substitution</span></button>
-    <button onclick="openPage('backup',this)">⇩ <span>Backup & Restore</span></button>
-  </div>
+ <div class="school-brand"><div class="school-logo">🏫</div><h1>Kyidsa<br>Primary School</h1><p>Learn • Grow • Serve</p></div>
+ <button class="nav-item active" onclick="openPage('dashboard',this)"><span class="nav-icon" title="Dashboard">🏠</span><span class="nav-label">Dashboard</span><span class="nav-arrow">›</span><span class="tooltip"><b>Dashboard</b>View overview and timetable statistics.</span></button>
+ <button class="nav-item" onclick="openPage('teachers',this)"><span class="nav-icon" title="Teachers">👩‍🏫</span><span class="nav-label">Teachers</span><span class="nav-arrow">›</span><span class="tooltip"><b>Teachers</b>Add, edit or remove teachers and set their workload.</span></button>
+ <button class="nav-item" onclick="openPage('classes',this)"><span class="nav-icon" title="Classes">🏫</span><span class="nav-label">Classes</span><span class="nav-arrow">›</span><span class="tooltip"><b>Classes</b>Manage classes and the number of periods per day.</span></button>
+ <button class="nav-item" onclick="openPage('classTeachers',this)"><span class="nav-icon" title="Class Teachers">👨‍🏫</span><span class="nav-label">Class Teachers</span><span class="nav-arrow">›</span><span class="tooltip"><b>Class Teachers</b>Assign or change the class teacher for every class.</span></button>
+ <button class="nav-item" onclick="openPage('subjects',this)"><span class="nav-icon" title="Subjects">📚</span><span class="nav-label">Subjects</span><span class="nav-arrow">›</span><span class="tooltip"><b>Subjects</b>Manage school subjects and shared facilities.</span></button>
+ <button class="nav-item" onclick="openPage('allocations',this)"><span class="nav-icon" title="Subject Allocation">🔗</span><span class="nav-label">Subject Allocation</span><span class="nav-arrow">›</span><span class="tooltip"><b>Subject Allocation</b>Assign subjects and weekly periods to teachers.</span></button>
+ <button class="nav-item" onclick="openPage('generate',this)"><span class="nav-icon" title="Generate Timetable">⚡</span><span class="nav-label">Generate Timetable</span><span class="nav-arrow">›</span><span class="tooltip"><b>Generate Timetable</b>Create a clash-free timetable automatically.</span></button>
+ <button class="nav-item" onclick="openPage('substitution',this)"><span class="nav-icon" title="Substitution">🔄</span><span class="nav-label">Substitution</span><span class="nav-arrow">›</span><span class="tooltip"><b>Substitution</b>Find available teachers when someone is absent.</span></button>
+ <button class="nav-item" onclick="openPage('reports',this)"><span class="nav-icon" title="Reports">📊</span><span class="nav-label">Reports</span><span class="nav-arrow">›</span><span class="tooltip"><b>Reports</b>View class, teacher and timetable reports.</span></button>
+ <button class="nav-item" onclick="openPage('settings',this)"><span class="nav-icon" title="Settings">⚙️</span><span class="nav-label">Settings</span><span class="nav-arrow">›</span><span class="tooltip"><b>Settings</b>Manage school days and timetable preferences.</span></button>
 </aside>
 
 <main class="main">
-<div class="topbar"><div><h2 id="pageTitle">Dashboard</h2><p id="pageSub">Manage your school timetable in one place.</p></div><button class="btn secondary" onclick="saveLocal()">Save Changes</button></div>
+<header class="topbar"><div class="top-left"><span class="hamburger">☰</span><span class="top-title">School Timetable Manager</span></div><div class="admin"><span class="admin-icon">♟</span> Admin⌄</div></header>
+<div class="content">
 
 <section id="dashboard" class="page active">
-<div class="grid g4">
-<div class="stat"><b id="statTeachers">0</b><span>Teachers</span></div>
-<div class="stat"><b id="statClasses">0</b><span>Classes</span></div>
-<div class="stat"><b id="statAllocations">0</b><span>Subject Allocations</span></div>
-<div class="stat"><b id="statLessons">0</b><span>Scheduled Lessons</span></div>
-</div>
-<div class="card" style="margin-top:18px"><h3>Getting Started</h3>
-<p class="muted">1. Add teachers. 2. Add classes. 3. Add subject allocations. 4. Generate the timetable. 5. Check substitutions whenever a teacher is absent.</p>
-<div class="actions"><button class="btn" onclick="openPage('teachers')">Add Teachers</button><button class="btn secondary" onclick="openPage('classes')">Add Classes</button><button class="btn secondary" onclick="openPage('allocations')">Allocate Subjects</button></div>
-</div>
+<div class="eyebrow">Overview</div><div class="page-heading"><div><h2>Dashboard</h2><p>Manage your school timetable from one professional workspace.</p></div></div>
+<div class="grid g4"><div class="stat"><strong id="stTeachers">0</strong><span>Teachers</span></div><div class="stat"><strong id="stClasses">0</strong><span>Classes</span></div><div class="stat"><strong id="stSubjects">0</strong><span>Subjects</span></div><div class="stat"><strong id="stLessons">0</strong><span>Scheduled Lessons</span></div></div>
+<div class="card" style="margin-top:22px"><h3>Quick Start</h3><p class="muted">Add your teachers, classes and subjects first. Then allocate subjects and generate the timetable automatically.</p><div class="toolbar"><button class="primary-btn" onclick="openPage('teachers')">Manage Teachers</button><button class="secondary-btn" onclick="openPage('classes')">Manage Classes</button><button class="secondary-btn" onclick="openPage('allocations')">Subject Allocation</button></div></div>
 </section>
 
 <section id="teachers" class="page">
-<div class="card"><h3>Teachers</h3><p class="muted">Add, edit or remove teachers. There is no fixed limit, so the same system can be used for more than 100 teachers.</p>
-<div class="actions"><button class="btn" onclick="showTeacherModal()">+ Add Teacher</button></div></div>
-<div class="card"><div id="teacherTable"></div></div>
+<div class="eyebrow">Teachers</div>
+<div class="page-heading"><div><h2>Teachers</h2><p>Add, edit or remove teachers.</p></div><button class="primary-btn" onclick="showTeacherModal()">＋ Add Teacher</button></div>
+<div class="card">
+<div class="toolbar"><div class="search"><span>⌕</span><input id="teacherSearch" oninput="renderTeachers()" placeholder="Search teachers..."></div><select id="teacherFilter" onchange="renderTeachers()" style="max-width:180px"><option value="">All Teachers</option><option value="active">Active</option></select></div>
+<div id="teacherTable"></div><div class="pagination"><span id="teacherCount">Showing 0 teachers</span><span>‹ &nbsp; <b>1</b> &nbsp; ›</span></div>
+</div>
 </section>
 
 <section id="classes" class="page">
-<div class="card"><h3>Classes</h3><p class="muted">Add each class and the number of periods per day.</p>
-<div class="form-grid"><div><label>Class Name</label><input id="newClassName" placeholder="Example: IV"></div><div><label>Periods per Day</label><input id="newClassPeriods" type="number" value="8" min="1"></div><div><button class="btn" onclick="addClass()">+ Add Class</button></div></div></div>
+<div class="eyebrow">Classes</div><div class="page-heading"><div><h2>Classes</h2><p>Manage classes and periods.</p></div><button class="primary-btn" onclick="showClassModal()">＋ Add Class</button></div>
 <div class="card"><div id="classTable"></div></div>
 </section>
 
+
+<section id="classTeachers" class="page">
+<div class="eyebrow">Academic Setup</div>
+<div class="page-heading">
+  <div>
+    <h2>Class Teachers</h2>
+    <p>Assign one class teacher to each class and change the assignment anytime.</p>
+  </div>
+</div>
+<div class="card">
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Select Class</label>
+      <select id="ctClass"></select>
+    </div>
+    <div class="form-group">
+      <label>Select Class Teacher</label>
+      <select id="ctTeacher"></select>
+    </div>
+    <div class="form-group full">
+      <button class="primary-btn" style="padding:12px 18px" onclick="assignClassTeacher()">Assign Class Teacher</button>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <h3>Current Class Teacher Assignments</h3>
+  <p class="muted">Each class can have one assigned class teacher.</p>
+  <div id="classTeacherTable"></div>
+</div>
+</section>
+
+<section id="subjects" class="page">
+<div class="eyebrow">Subjects</div><div class="page-heading"><div><h2>Subjects</h2><p>Manage subjects used by the school.</p></div><button class="primary-btn" onclick="showSubjectModal()">＋ Add Subject</button></div>
+<div class="card"><div id="subjectTable"></div></div>
+</section>
+
 <section id="allocations" class="page">
-<div class="card"><h3>Subject Allocation</h3><p class="muted">Choose the class, subject, teacher and number of periods per week. Add a shared resource such as ICT Lab if required.</p>
+<div class="eyebrow">Academic Setup</div><div class="page-heading"><div><h2>Subject Allocation</h2><p>Assign subjects and weekly periods to teachers.</p></div></div>
+<div class="card">
 <div class="form-grid">
-<div><label>Class</label><select id="aClass"></select></div>
-<div><label>Subject</label><input id="aSubject" placeholder="Example: Maths"></div>
-<div><label>Teacher</label><select id="aTeacher"></select></div>
+<div class="form-group"><label>Class</label><select id="aClass"></select></div>
+<div class="form-group"><label>Subject</label><select id="aSubject"></select></div>
+<div class="form-group"><label>Teacher</label><select id="aTeacher"></select></div>
+<div class="form-group"><label>Periods per Week</label><input id="aPeriods" type="number" value="5" min="1"></div>
+<div class="form-group"><label>Shared Resource (Optional)</label><input id="aResource" placeholder="Example: ICT Lab"></div>
+<div class="form-group"><label>&nbsp;</label><button class="primary-btn" style="width:100%;padding:12px" onclick="addAllocation()">Add Allocation</button></div>
 </div>
-<div class="form-grid" style="margin-top:12px">
-<div><label>Periods per Week</label><input id="aPeriods" type="number" min="1" value="5"></div>
-<div><label>Shared Resource (Optional)</label><input id="aResource" placeholder="Example: ICT Lab"></div>
-<div><button class="btn" onclick="addAllocation()">+ Add Allocation</button></div>
-</div>
-</div>
-<div class="card"><div id="allocationTable"></div></div>
+</div><div class="card"><div id="allocationTable"></div></div>
 </section>
 
 <section id="generate" class="page">
-<div class="card"><h3>Generate Timetable</h3><p class="muted">The generator checks class availability, teacher availability, blocked periods, maximum daily workload and shared resources.</p>
-<div class="grid g3">
-<div><label>Generation Attempts</label><input id="attempts" type="number" value="1000" min="1" max="10000"></div>
-<div><label>School Days</label><select id="dayCount" onchange="updateDays()"><option value="5">5 Days</option><option value="6">6 Days</option></select></div>
-<div><label>Same Subject Spreading</label><select id="spread"><option value="yes">Avoid unnecessary repetition</option><option value="no">No preference</option></select></div>
-</div>
-<div class="actions"><button class="btn success" onclick="generate()">Generate Automatically</button><button class="btn secondary" onclick="checkClashes()">Check Current Timetable</button><button class="btn danger" onclick="clearSchedule()">Clear Timetable</button></div>
-<div id="generatorMessage"></div>
-</div>
-<div class="card"><h3>Current Clash Status</h3><div id="clashBox" class="muted">Generate or check a timetable to see the result.</div></div>
-</section>
-
-<section id="view" class="page">
-<div class="card"><div class="grid g2"><div><label>View by Class</label><select id="viewClass" onchange="renderClassView()"></select></div><div><label>View by Teacher</label><select id="viewTeacher" onchange="renderTeacherView()"></select></div></div></div>
-<div class="card"><div id="timetableView"></div></div>
+<div class="eyebrow">Automation</div><div class="page-heading"><div><h2>Generate Timetable</h2><p>Automatically create and check a timetable.</p></div></div>
+<div class="card"><div class="grid g3"><div class="form-group"><label>Generation Attempts</label><input id="attempts" type="number" value="1000"></div><div class="form-group"><label>School Days</label><select id="dayCount" onchange="updateDays()"><option value="5">5 Days</option><option value="6">6 Days</option></select></div><div class="form-group"><label>Subject Spreading</label><select id="spread"><option value="yes">Avoid repetition</option><option value="no">No preference</option></select></div></div>
+<div class="toolbar"><button class="primary-btn" onclick="generate()">Generate Automatically</button><button class="secondary-btn" onclick="checkClashes()">Check Clashes</button><button class="danger-btn" onclick="clearSchedule()">Clear Timetable</button></div><div id="generateMessage"></div></div>
+<div class="card"><h3>Clash Status</h3><div id="clashBox" class="muted">No check has been run yet.</div></div>
 </section>
 
 <section id="substitution" class="page">
-<div class="card"><h3>Find a Substitute</h3><p class="muted">Select the absent teacher, day and period. The system finds teachers who are free at that time and ranks suitable substitutes.</p>
-<div class="grid g3"><div><label>Absent Teacher</label><select id="absentTeacher" onchange="showAbsentLessons()"></select></div><div><label>Day</label><select id="subDay" onchange="showAbsentLessons()"></select></div><div><label>Period</label><select id="subPeriod" onchange="showAbsentLessons()"></select></div></div>
-<div id="absentLessons" style="margin-top:14px"></div></div>
-<div class="card"><h3>Substitution Records</h3><div id="subTable"></div></div>
+<div class="eyebrow">Daily Management</div><div class="page-heading"><div><h2>Substitution</h2><p>Find a suitable teacher when another teacher is absent.</p></div></div>
+<div class="card"><div class="grid g3"><div class="form-group"><label>Absent Teacher</label><select id="absTeacher" onchange="showAbsentLesson()"></select></div><div class="form-group"><label>Day</label><select id="subDay" onchange="showAbsentLesson()"></select></div><div class="form-group"><label>Period</label><select id="subPeriod" onchange="showAbsentLesson()"></select></div></div><div id="subSuggestion"></div></div>
+<div class="card"><h3>Substitution Records</h3><div id="subRecords"></div></div>
 </section>
 
-<section id="backup" class="page">
-<div class="card"><h3>Backup Your School Data</h3><p class="muted">Download your teachers, classes, allocations, timetable and substitutions. You can restore the same file later.</p>
-<div class="actions"><button class="btn" onclick="exportBackup()">Download Backup</button><label class="btn secondary" style="display:inline-block;width:auto">Restore Backup<input type="file" accept=".json" style="display:none" onchange="restoreBackup(event)"></label><button class="btn danger" onclick="resetAll()">Reset Everything</button></div></div>
+<section id="reports" class="page">
+<div class="eyebrow">Reports</div><div class="page-heading"><div><h2>Timetable Reports</h2><p>View timetables by class or teacher.</p></div></div>
+<div class="card"><div class="grid g2"><div class="form-group"><label>Class Timetable</label><select id="reportClass" onchange="renderClassReport()"></select></div><div class="form-group"><label>Teacher Timetable</label><select id="reportTeacher" onchange="renderTeacherReport()"></select></div></div></div>
+<div class="card"><div id="reportArea" class="empty">Select a class or teacher to view the timetable.</div></div>
 </section>
-</main>
-</div>
 
-<div id="teacherModalBg" class="modal-bg"><div class="modal">
-<h3 id="teacherModalTitle">Add Teacher</h3>
-<div class="modal-grid">
-<div><label>Teacher Name</label><input id="tName" placeholder="Example: Thinley Wangchuk"></div>
-<div><label>Maximum Periods per Day</label><input id="tMaxDaily" type="number" value="6" min="1"></div>
-<div><label>Blocked Day</label><select id="tBlockDay"><option value="">None</option></select></div>
-<div><label>Blocked Period</label><input id="tBlockPeriod" type="number" min="1" placeholder="Example: 6"></div>
-</div>
-<p class="muted" style="margin-top:12px">Blocked period is optional. You can edit a teacher later if their availability changes.</p>
-<div class="actions"><button class="btn" onclick="saveTeacher()">Save Teacher</button><button class="btn secondary" onclick="closeTeacherModal()">Cancel</button></div>
-</div></div>
+<section id="settings" class="page">
+<div class="eyebrow">System</div><div class="page-heading"><div><h2>Settings</h2><p>Manage and protect your timetable data.</p></div></div>
+<div class="card"><h3>Backup</h3><p class="muted">Download your complete timetable data and restore it later.</p><div class="toolbar"><button class="primary-btn" onclick="exportData()">Download Backup</button><label class="secondary-btn">Restore Backup<input type="file" accept=".json" style="display:none" onchange="restoreData(event)"></label><button class="danger-btn" onclick="resetData()">Reset All Data</button></div></div>
+</section>
+
+<div class="footer">Kyidsa Primary School &nbsp; | &nbsp; School Timetable Manager &nbsp; <span style="float:right">v4.0</span></div>
+</div></main></div>
+
+<div id="teacherModal" class="modal-bg"><div class="modal"><h3 id="teacherModalTitle">Add Teacher</h3><div class="form-grid"><div class="form-group full"><label>Teacher Name</label><input id="tName" placeholder="Enter teacher name"></div><div class="form-group"><label>Main Subject</label><input id="tSubject" placeholder="Example: Dzongkha"></div><div class="form-group"><label>Maximum Periods / Day</label><input id="tMax" type="number" value="6"></div><div class="form-group"><label>Blocked Day (Optional)</label><select id="tDay"></select></div><div class="form-group"><label>Blocked Period (Optional)</label><input id="tPeriod" type="number" min="1"></div></div><div class="modal-actions"><button class="secondary-btn" onclick="closeModal('teacherModal')">Cancel</button><button class="primary-btn" style="padding:11px 18px" onclick="saveTeacher()">Save Teacher</button></div></div></div>
+
+<div id="classModal" class="modal-bg"><div class="modal"><h3>Add Class</h3><div class="form-grid"><div class="form-group"><label>Class Name</label><input id="cName" placeholder="Example: IV"></div><div class="form-group"><label>Periods per Day</label><input id="cPeriods" type="number" value="8"></div></div><div class="modal-actions"><button class="secondary-btn" onclick="closeModal('classModal')">Cancel</button><button class="primary-btn" style="padding:11px 18px" onclick="saveClass()">Save Class</button></div></div></div>
+
+<div id="subjectModal" class="modal-bg"><div class="modal"><h3>Add Subject</h3><div class="form-group"><label>Subject Name</label><input id="sName" placeholder="Example: Mathematics"></div><div class="modal-actions"><button class="secondary-btn" onclick="closeModal('subjectModal')">Cancel</button><button class="primary-btn" style="padding:11px 18px" onclick="saveSubject()">Save Subject</button></div></div></div>
 
 <script>
-let S={days:["Mon","Tue","Wed","Thu","Fri"],teachers:[],classes:[],allocations:[],schedule:{},substitutions:[]};
-let editingTeacher=null;
+let S={days:["Mon","Tue","Wed","Thu","Fri"],teachers:[],classes:[],subjects:[],allocations:[],schedule:{},substitutions:[]};
+let editTeacherIndex=null;
+const store="kyidsaTimetableV3";
+function load(){try{const x=JSON.parse(localStorage.getItem(store));if(x)S={...S,...x}}catch(e){}}
+function save(){localStorage.setItem(store,JSON.stringify(S))}
+function openPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');refreshAll()}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function showTeacherModal(i=null){editTeacherIndex=i;document.getElementById('teacherModalTitle').textContent=i===null?'Add Teacher':'Edit Teacher';let t=i===null?{name:'',subject:'',maxDaily:6,blocked:''}:S.teachers[i];document.getElementById('tName').value=t.name;document.getElementById('tSubject').value=t.subject||'';document.getElementById('tMax').value=t.maxDaily||6;let b=(t.blocked||'').split('-P');fillDays();document.getElementById('tDay').value=b.length===2?b[0]:'';document.getElementById('tPeriod').value=b.length===2?b[1]:'';document.getElementById('teacherModal').classList.add('show')}
+function showClassModal(){document.getElementById('classModal').classList.add('show')}
+function showSubjectModal(){document.getElementById('subjectModal').classList.add('show')}
+function fillDays(){let e=document.getElementById('tDay');e.innerHTML='<option value="">None</option>'+S.days.map(d=>`<option>${d}</option>`).join('')}
+function saveTeacher(){let name=tName.value.trim();if(!name)return alert('Enter teacher name.');let t={name,subject:tSubject.value.trim(),maxDaily:Number(tMax.value)||99,blocked:tDay.value&&tPeriod.value?`${tDay.value}-P${tPeriod.value}`:''};if(editTeacherIndex===null){if(S.teachers.some(x=>x.name.toLowerCase()===name.toLowerCase()))return alert('Teacher already exists.');S.teachers.push(t)}else{let old=S.teachers[editTeacherIndex].name;S.allocations.forEach(a=>{if(a.teacher===old)a.teacher=name});S.teachers[editTeacherIndex]=t}save();closeModal('teacherModal');refreshAll()}
+function renderTeachers(){let q=(document.getElementById('teacherSearch')?.value||'').toLowerCase();let arr=S.teachers.map((t,i)=>({...t,i})).filter(t=>t.name.toLowerCase().includes(q)||t.subject?.toLowerCase().includes(q));let el=document.getElementById('teacherTable');if(!arr.length){el.innerHTML='<div class="empty">No teachers found. Click Add Teacher to begin.</div>';document.getElementById('teacherCount').textContent='Showing 0 teachers';return}el.innerHTML=`<div class="table-wrap"><table><tr><th>#</th><th>Teacher Name</th><th>Main Subject</th><th>Max Periods/Day</th><th>Status</th><th>Actions</th></tr>${arr.map((t,n)=>`<tr><td>${n+1}</td><td><b>${t.name}</b></td><td>${t.subject||'—'}</td><td>${t.maxDaily}</td><td><span class="badge active">Active</span></td><td><button class="icon-btn edit" onclick="showTeacherModal(${t.i})">✎</button><button class="icon-btn delete" onclick="deleteTeacher(${t.i})">🗑</button></td></tr>`).join('')}</table></div>`;document.getElementById('teacherCount').textContent=`Showing ${arr.length} of ${S.teachers.length} teachers`}
+function deleteTeacher(i){let t=S.teachers[i];if(S.classes.some(c=>c.classTeacher===t.name))return alert('This teacher is assigned as a class teacher. Change the class teacher assignment first.');if(S.allocations.some(a=>a.teacher===t.name))return alert('Remove or change this teacher’s subject allocations first.');if(confirm(`Remove ${t.name}?`)){S.teachers.splice(i,1);save();refreshAll()}}
+function saveClass(){let name=cName.value.trim(),p=Number(cPeriods.value);if(!name)return alert('Enter class name.');if(S.classes.some(c=>c.name===name))return alert('Class already exists.');S.classes.push({name,periodsPerDay:p||8,classTeacher:''});cName.value='';save();closeModal('classModal');refreshAll()}
+function renderClasses(){let el=document.getElementById('classTable');el.innerHTML=S.classes.length?`<div class="table-wrap"><table><tr><th>#</th><th>Class</th><th>Class Teacher</th><th>Periods / Day</th><th>Action</th></tr>${S.classes.map((c,i)=>`<tr><td>${i+1}</td><td><span class="badge class">${c.name}</span></td><td><b>${c.classTeacher||'<span class="muted">Not assigned</span>'}</b></td><td>${c.periodsPerDay}</td><td><button class="icon-btn delete" onclick="deleteClass(${i})">🗑</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No classes added yet.</div>'}
+function deleteClass(i){let c=S.classes[i];if(S.allocations.some(a=>a.className===c.name))return alert('Remove class allocations first.');if(confirm('Remove this class?')){S.classes.splice(i,1);save();refreshAll()}}
+function saveSubject(){let name=sName.value.trim();if(!name)return alert('Enter subject name.');if(S.subjects.includes(name))return alert('Subject already exists.');S.subjects.push(name);sName.value='';save();closeModal('subjectModal');refreshAll()}
+function renderSubjects(){let el=document.getElementById('subjectTable');el.innerHTML=S.subjects.length?`<div class="table-wrap"><table><tr><th>#</th><th>Subject</th><th>Action</th></tr>${S.subjects.map((s,i)=>`<tr><td>${i+1}</td><td><b>${s}</b></td><td><button class="icon-btn delete" onclick="S.subjects.splice(${i},1);save();refreshAll()">🗑</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No subjects added yet.</div>'}
+function options(id,items,empty='Select'){let e=document.getElementById(id);if(!e)return;let old=e.value;e.innerHTML=items.length?items.map(x=>`<option value="${String(x).replace(/"/g,'&quot;')}">${x}</option>`).join(''):`<option value="">${empty}</option>`;if(items.includes(old))e.value=old}
+function fillSelectors(){options('aClass',S.classes.map(c=>c.name));options('aSubject',S.subjects);options('aTeacher',S.teachers.map(t=>t.name));options('absTeacher',S.teachers.map(t=>t.name));options('subDay',S.days);options('reportClass',S.classes.map(c=>c.name));options('reportTeacher',S.teachers.map(t=>t.name));options('ctClass',S.classes.map(c=>c.name));options('ctTeacher',S.teachers.map(t=>t.name));let max=Math.max(8,...S.classes.map(c=>c.periodsPerDay));options('subPeriod',Array.from({length:max},(_,i)=>String(i+1)))}
 
-function loadLocal(){try{let x=JSON.parse(localStorage.getItem("schoolTimetableProfessional"));if(x)S=x}catch(e){}}
-function saveLocal(){localStorage.setItem("schoolTimetableProfessional",JSON.stringify(S));flash("Changes saved in this browser.","ok")}
-function flash(msg,type="ok"){document.getElementById("generatorMessage").innerHTML=`<div class="notice ${type}">${msg}</div>`}
-function openPage(id,btn){
-document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");
-document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));if(btn)btn.classList.add("active");
-let titles={dashboard:["Dashboard","Manage your school timetable in one place."],teachers:["Teachers","Add, edit or remove teachers."],classes:["Classes","Manage classes and daily periods."],allocations:["Subject Allocation","Assign subjects and weekly periods to teachers."],generate:["Generate Timetable","Create and verify the school timetable."],view:["View Timetable","View class and teacher schedules."],substitution:["Substitution","Find available replacement teachers."],backup:["Backup & Restore","Protect and reuse your school data."]};
-document.getElementById("pageTitle").textContent=titles[id][0];document.getElementById("pageSub").textContent=titles[id][1];
-refreshAll();
+function assignClassTeacher(){
+  let className=document.getElementById('ctClass').value;
+  let teacher=document.getElementById('ctTeacher').value;
+  if(!className || !teacher) return alert('Please select both a class and a teacher.');
+  let c=S.classes.find(x=>x.name===className);
+  if(!c) return;
+  c.classTeacher=teacher;
+  save();
+  refreshAll();
+  alert(teacher+' has been assigned as the class teacher of Class '+className+'.');
 }
-function refreshAll(){renderStats();renderTeachers();renderClasses();fillSelectors();renderAllocations();renderSubTable();renderClassView();}
-function renderStats(){document.getElementById("statTeachers").textContent=S.teachers.length;document.getElementById("statClasses").textContent=S.classes.length;document.getElementById("statAllocations").textContent=S.allocations.length;document.getElementById("statLessons").textContent=Object.values(S.schedule).reduce((n,x)=>n+Object.keys(x||{}).length,0)}
-function renderTeachers(){
-let el=document.getElementById("teacherTable");if(!S.teachers.length){el.innerHTML='<div class="empty">No teachers added yet. Click <b>Add Teacher</b> to begin.</div>';return}
-el.innerHTML=`<div class="table-wrap"><table><tr><th>#</th><th>Teacher</th><th>Max Daily Periods</th><th>Blocked Period</th><th>Action</th></tr>${S.teachers.map((t,i)=>`<tr><td>${i+1}</td><td><b>${t.name}</b></td><td>${t.maxDaily}</td><td>${t.blocked||"None"}</td><td><button class="btn secondary small" onclick="showTeacherModal(${i})">Edit</button> <button class="btn danger small" onclick="deleteTeacher(${i})">Remove</button></td></tr>`).join("")}</table></div>`;
+function renderClassTeachers(){
+  let el=document.getElementById('classTeacherTable');
+  if(!el) return;
+  if(!S.classes.length){
+    el.innerHTML='<div class="empty">No classes added yet.</div>';
+    return;
+  }
+  el.innerHTML=`<div class="table-wrap"><table><tr><th>#</th><th>Class</th><th>Class Teacher</th><th>Status</th><th>Action</th></tr>${S.classes.map((c,i)=>`<tr><td>${i+1}</td><td><span class="badge class">${c.name}</span></td><td><b>${c.classTeacher||'Not assigned'}</b></td><td>${c.classTeacher?'<span class="badge active">Assigned</span>':'<span class="badge" style="background:#fff8e8;color:#a36b0b">Pending</span>'}</td><td>${c.classTeacher?`<button class="secondary-btn" onclick="removeClassTeacher(${i})">Remove</button>`:'—'}</td></tr>`).join('')}</table></div>`;
 }
-function showTeacherModal(i=null){
-editingTeacher=i;document.getElementById("teacherModalTitle").textContent=i===null?"Add Teacher":"Edit Teacher";
-let t=i===null?{name:"",maxDaily:6,blocked:""}:S.teachers[i];document.getElementById("tName").value=t.name;document.getElementById("tMaxDaily").value=t.maxDaily;
-let b=(t.blocked||"").split("-P");document.getElementById("tBlockDay").value=b.length===2?b[0]:"";document.getElementById("tBlockPeriod").value=b.length===2?b[1]:"";
-document.getElementById("teacherModalBg").classList.add("show");
+function removeClassTeacher(i){
+  if(confirm('Remove this class teacher assignment?')){
+    S.classes[i].classTeacher='';
+    save();
+    refreshAll();
+  }
 }
-function closeTeacherModal(){document.getElementById("teacherModalBg").classList.remove("show")}
-function saveTeacher(){
-let name=document.getElementById("tName").value.trim(),maxDaily=Number(document.getElementById("tMaxDaily").value),d=document.getElementById("tBlockDay").value,p=document.getElementById("tBlockPeriod").value;
-if(!name)return alert("Please enter teacher name.");if(editingTeacher===null&&S.teachers.some(t=>t.name.toLowerCase()===name.toLowerCase()))return alert("This teacher already exists.");
-let t={name,maxDaily:maxDaily||99,blocked:d&&p?`${d}-P${p}`:""};if(editingTeacher===null)S.teachers.push(t);else{let old=S.teachers[editingTeacher].name;if(old!==name)S.allocations.forEach(a=>{if(a.teacher===old)a.teacher=name});S.teachers[editingTeacher]=t}
-closeTeacherModal();saveLocal();refreshAll();
-}
-function deleteTeacher(i){let t=S.teachers[i];if(S.allocations.some(a=>a.teacher===t.name))return alert("This teacher is still assigned to subjects. Remove or change those subject allocations first.");if(confirm(`Remove ${t.name}?`)){S.teachers.splice(i,1);saveLocal();refreshAll()}}
-function addClass(){let name=document.getElementById("newClassName").value.trim(),periods=Number(document.getElementById("newClassPeriods").value);if(!name)return alert("Enter class name.");if(S.classes.some(c=>c.name===name))return alert("Class already exists.");S.classes.push({name,periodsPerDay:periods||5});document.getElementById("newClassName").value="";saveLocal();refreshAll()}
-function renderClasses(){let el=document.getElementById("classTable");if(!S.classes.length){el.innerHTML='<div class="empty">No classes added yet.</div>';return}el.innerHTML=`<div class="table-wrap"><table><tr><th>#</th><th>Class</th><th>Periods / Day</th><th>Action</th></tr>${S.classes.map((c,i)=>`<tr><td>${i+1}</td><td><b>${c.name}</b></td><td>${c.periodsPerDay}</td><td><button class="btn danger small" onclick="deleteClass(${i})">Remove</button></td></tr>`).join("")}</table></div>`}
-function deleteClass(i){let c=S.classes[i];if(S.allocations.some(a=>a.className===c.name))return alert("This class still has subject allocations. Remove them first.");if(confirm(`Remove Class ${c.name}?`)){S.classes.splice(i,1);saveLocal();refreshAll()}}
-function fill(sel,items,placeholder="Select"){let el=document.getElementById(sel);if(!el)return;let old=el.value;el.innerHTML=items.length?items.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join(""):`<option value="">${placeholder}</option>`;if(items.includes(old))el.value=old}
-function esc(x){return String(x).replace(/"/g,"&quot;")}
-function fillSelectors(){
-let cn=S.classes.map(c=>c.name),tn=S.teachers.map(t=>t.name);fill("aClass",cn);fill("aTeacher",tn);fill("viewClass",cn);fill("viewTeacher",tn);fill("absentTeacher",tn);fill("subDay",S.days);
-let max=Math.max(8,...S.classes.map(c=>c.periodsPerDay));fill("subPeriod",Array.from({length:max},(_,i)=>String(i+1)));
-let bd=document.getElementById("tBlockDay");if(bd){let old=bd.value;bd.innerHTML='<option value="">None</option>'+S.days.map(d=>`<option>${d}</option>`).join("");if(S.days.includes(old))bd.value=old}
-}
-function addAllocation(){let className=document.getElementById("aClass").value,subject=document.getElementById("aSubject").value.trim(),teacher=document.getElementById("aTeacher").value,periods=Number(document.getElementById("aPeriods").value),resource=document.getElementById("aResource").value.trim();if(!className||!teacher||!subject||periods<1)return alert("Please complete all required fields.");S.allocations.push({className,subject,teacher,periodsPerWeek:periods,resource});document.getElementById("aSubject").value="";document.getElementById("aResource").value="";saveLocal();refreshAll()}
-function renderAllocations(){let el=document.getElementById("allocationTable");if(!S.allocations.length){el.innerHTML='<div class="empty">No subject allocations yet.</div>';return}el.innerHTML=`<div class="table-wrap"><table><tr><th>Class</th><th>Subject</th><th>Teacher</th><th>Periods / Week</th><th>Resource</th><th>Action</th></tr>${S.allocations.map((a,i)=>`<tr><td><span class="badge">${a.className}</span></td><td><b>${a.subject}</b></td><td>${a.teacher}</td><td>${a.periodsPerWeek}</td><td>${a.resource||"—"}</td><td><button class="btn danger small" onclick="S.allocations.splice(${i},1);saveLocal();refreshAll()">Remove</button></td></tr>`).join("")}</table></div>`}
-function updateDays(){let n=Number(document.getElementById("dayCount").value);S.days=n===6?["Mon","Tue","Wed","Thu","Fri","Sat"]:["Mon","Tue","Wed","Thu","Fri"];fillSelectors()}
-function k(d,p){return d+"-P"+p}
-function teacherByName(n){return S.teachers.find(t=>t.name===n)}
-function slots(c){let a=[];S.days.forEach(d=>{for(let p=1;p<=c.periodsPerDay;p++)a.push({day:d,p,key:k(d,p)})});return a}
-function busyTeacher(s,teacher,slot){return S.classes.some(c=>s[c.name]?.[slot.key]?.teacher===teacher)}
-function busyResource(s,res,slot){return res&&S.classes.some(c=>s[c.name]?.[slot.key]?.resource===res)}
-function dailyLoad(s,teacher,day){let n=0;S.classes.forEach(c=>Object.entries(s[c.name]||{}).forEach(([z,v])=>{if(z.startsWith(day+"-")&&v.teacher===teacher)n++}));return n}
-function sameSubjectDay(s,cname,day,subj){return Object.entries(s[cname]||{}).filter(([z,v])=>z.startsWith(day+"-")&&v.subject===subj).length}
-function generate(){
-if(!S.teachers.length||!S.classes.length||!S.allocations.length)return flash("Please add teachers, classes and subject allocations first.","warn");
-let attempts=Number(document.getElementById("attempts").value)||1000,spread=document.getElementById("spread").value==="yes";
-let req=[];S.allocations.forEach(a=>{for(let i=0;i<a.periodsPerWeek;i++)req.push({...a,id:Math.random()})});
-let best=null,bestUn=1e9,bestScore=1e18;
-for(let attempt=0;attempt<attempts;attempt++){
-let s={};S.classes.forEach(c=>s[c.name]={});let shuffled=[...req].sort(()=>Math.random()-.5);let un=[];
-shuffled.sort((a,b)=>(b.resource?1:0)-(a.resource?1:0)||b.periodsPerWeek-a.periodsPerWeek);
-for(let a of shuffled){
-let c=S.classes.find(x=>x.name===a.className),t=teacherByName(a.teacher);let cand=slots(c).filter(sl=>{
-if(s[a.className][sl.key])return false;if(t.blocked===sl.key)return false;if(busyTeacher(s,a.teacher,sl)||busyResource(s,a.resource,sl))return false;if(dailyLoad(s,a.teacher,sl.day)>=t.maxDaily)return false;return true});
-if(!cand.length){un.push(a);continue}
-cand.sort((x,y)=>{
-let sx=Math.random()*2+(spread?sameSubjectDay(s,a.className,x.day,a.subject)*8:0)+dailyLoad(s,a.teacher,x.day);
-let sy=Math.random()*2+(spread?sameSubjectDay(s,a.className,y.day,a.subject)*8:0)+dailyLoad(s,a.teacher,y.day);return sx-sy});
-let sl=cand[0];s[a.className][sl.key]={subject:a.subject,teacher:a.teacher,resource:a.resource||""};
-}
-let score=un.length*10000;if(un.length<bestUn||(un.length===bestUn&&score<bestScore)){best=s;bestUn=un.length;bestScore=score;if(bestUn===0)break}
-}
-S.schedule=best||{};saveLocal();refreshAll();checkClashes();
-flash(bestUn===0?"Timetable generated successfully with all lessons placed.":`Timetable generated, but ${bestUn} lesson(s) could not be placed. Review teacher availability or number of available periods.` ,bestUn===0?"ok":"warn");
-}
-function clearSchedule(){if(confirm("Clear the current timetable?")){S.schedule={};S.substitutions=[];saveLocal();refreshAll();document.getElementById("clashBox").textContent="Timetable cleared."}}
-function checkClashes(){
-let teacher={},resource={},issues=[];
-S.classes.forEach(c=>Object.entries(S.schedule[c.name]||{}).forEach(([slot,x])=>{(teacher[slot]??=[]).push({className:c.name,...x});if(x.resource)(resource[slot]??=[]).push({className:c.name,...x})}));
-Object.entries(teacher).forEach(([slot,a])=>{let m={};a.forEach(x=>(m[x.teacher]??=[]).push(x));Object.entries(m).forEach(([t,z])=>{if(z.length>1)issues.push(`Teacher clash: ${t} at ${slot}`)})});
-Object.entries(resource).forEach(([slot,a])=>{let m={};a.forEach(x=>(m[x.resource]??=[]).push(x));Object.entries(m).forEach(([r,z])=>{if(z.length>1)issues.push(`Resource clash: ${r} at ${slot}`)})});
-let box=document.getElementById("clashBox");box.innerHTML=issues.length?`<div class="notice bad"><b>${issues.length} clash(es) found:</b><br>${issues.join("<br>")}</div>`:`<div class="notice ok">No teacher or shared-resource clashes found.</div>`;return issues;
-}
-function renderClassView(){
-let cname=document.getElementById("viewClass")?.value;if(!cname||!S.classes.length)return;let c=S.classes.find(x=>x.name===cname),s=S.schedule[cname]||{};
-let h=`<h3>Class ${cname}</h3><div class="table-wrap"><table class="timetable"><tr><th>Day</th>`;for(let p=1;p<=c.periodsPerDay;p++)h+=`<th>P${p}</th>`;h+="</tr>";
-S.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=c.periodsPerDay;p++){let x=s[k(d,p)];h+=`<td>${x?`<div class="lesson">${x.subject}</div><div class="teacher">${x.teacher}</div>`:`<span class="muted">Free</span>`}</td>`}h+="</tr>"});h+="</table></div>";document.getElementById("timetableView").innerHTML=h;
-}
-function renderTeacherView(){
-let t=document.getElementById("viewTeacher")?.value;if(!t)return;let max=Math.max(...S.classes.map(c=>c.periodsPerDay),1),h=`<h3>${t}</h3><div class="table-wrap"><table class="timetable"><tr><th>Day</th>`;for(let p=1;p<=max;p++)h+=`<th>P${p}</th>`;h+="</tr>";
-S.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=max;p++){let found=null;S.classes.forEach(c=>{let x=S.schedule[c.name]?.[k(d,p)];if(x?.teacher===t)found={...x,className:c.name}});h+=`<td>${found?`<div class="lesson">${found.className} · ${found.subject}</div>`:`<span class="muted">Free</span>`}</td>`}h+="</tr>"});h+="</table></div>";document.getElementById("timetableView").innerHTML=h;
-}
-function lessonsAt(teacher,day,p){let out=[];S.classes.forEach(c=>{let x=S.schedule[c.name]?.[k(day,p)];if(x?.teacher===teacher)out.push({className:c.name,...x})});return out}
-function showAbsentLessons(){
-let teacher=document.getElementById("absentTeacher").value,day=document.getElementById("subDay").value,p=Number(document.getElementById("subPeriod").value),ls=lessonsAt(teacher,day,p),el=document.getElementById("absentLessons");
-if(!ls.length){el.innerHTML='<div class="notice warn">This teacher has no lesson during the selected period.</div>';return}
-el.innerHTML=ls.map((x,i)=>`<div class="notice ok"><b>Class ${x.className} · ${x.subject}</b><div class="actions"><button class="btn" onclick="findSub(${i})">Find Best Substitute</button></div></div>`).join("");
-window.currentAbsent={teacher,day,p,ls};
-}
-function findSub(i){
-let x=window.currentAbsent.ls[i],abs=window.currentAbsent,slot=k(abs.day,abs.p);
-let candidates=S.teachers.filter(t=>t.name!==abs.teacher&&!t.blocked===slot).filter(t=>!busyTeacher(S.schedule,t.name,{key:slot})).map(t=>{
-let match=S.allocations.some(a=>a.teacher===t.name&&a.subject===x.subject),load=S.allocations.filter(a=>a.teacher===t.name).reduce((n,a)=>n+a.periodsPerWeek,0);return {...t,match,load,score:(match?100:0)-load*.4}
-}).sort((a,b)=>b.score-a.score);
-let box=document.getElementById("absentLessons");box.innerHTML=`<div class="table-wrap"><table><tr><th>Rank</th><th>Teacher</th><th>Subject Match</th><th>Weekly Load</th><th>Action</th></tr>${candidates.map((t,j)=>`<tr><td>${j+1}</td><td><b>${t.name}</b></td><td>${t.match?"Yes":"No"}</td><td>${t.load}</td><td><button class="btn small" onclick="assignSub('${t.name.replace(/'/g,"\\'")}',${i})">Assign</button></td></tr>`).join("")}</table></div>`;
-}
-function assignSub(name,i){let x=window.currentAbsent.ls[i],a=window.currentAbsent;S.substitutions.push({day:a.day,period:a.p,className:x.className,subject:x.subject,absent:a.teacher,substitute:name});saveLocal();renderSubTable();alert(`Assigned ${name} as substitute.`)}
-function renderSubTable(){let el=document.getElementById("subTable");if(!S.substitutions.length){el.innerHTML='<div class="empty">No substitutions recorded.</div>';return}el.innerHTML=`<div class="table-wrap"><table><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent</th><th>Substitute</th></tr>${S.substitutions.map(x=>`<tr><td>${x.day}</td><td>P${x.period}</td><td>${x.className}</td><td>${x.subject}</td><td>${x.absent}</td><td><b>${x.substitute}</b></td></tr>`).join("")}</table></div>`}
-function exportBackup(){let b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="school-timetable-backup.json";a.click()}
-function restoreBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{S=JSON.parse(r.result);saveLocal();refreshAll();alert("Backup restored successfully.")}catch(err){alert("Invalid backup file.")}};r.readAsText(f)}
-function resetAll(){if(confirm("This will remove all teachers, classes, allocations and timetable data from this browser. Continue?")){S={days:["Mon","Tue","Wed","Thu","Fri"],teachers:[],classes:[],allocations:[],schedule:{},substitutions:[]};saveLocal();refreshAll()}}
-loadLocal();refreshAll();
+function addAllocation(){let className=aClass.value,subject=aSubject.value,teacher=aTeacher.value,periods=Number(aPeriods.value),resource=aResource.value.trim();if(!className||!subject||!teacher||periods<1)return alert('Complete all fields.');S.allocations.push({className,subject,teacher,periodsPerWeek:periods,resource});aResource.value='';save();refreshAll()}
+function renderAllocations(){let el=document.getElementById('allocationTable');el.innerHTML=S.allocations.length?`<div class="table-wrap"><table><tr><th>Class</th><th>Subject</th><th>Teacher</th><th>Periods/Week</th><th>Resource</th><th>Action</th></tr>${S.allocations.map((a,i)=>`<tr><td>${a.className}</td><td><b>${a.subject}</b></td><td>${a.teacher}</td><td>${a.periodsPerWeek}</td><td>${a.resource||'—'}</td><td><button class="icon-btn delete" onclick="S.allocations.splice(${i},1);save();refreshAll()">🗑</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No subject allocations yet.</div>'}
+function updateDays(){S.days=Number(dayCount.value)===6?['Mon','Tue','Wed','Thu','Fri','Sat']:['Mon','Tue','Wed','Thu','Fri'];save();fillSelectors()}
+function K(d,p){return d+'-P'+p} function T(n){return S.teachers.find(x=>x.name===n)}
+function classSlots(c){let a=[];S.days.forEach(d=>{for(let p=1;p<=c.periodsPerDay;p++)a.push({day:d,p,key:K(d,p)})});return a}
+function teacherBusy(s,t,slot){return S.classes.some(c=>s[c.name]?.[slot.key]?.teacher===t)}
+function resourceBusy(s,r,slot){return r&&S.classes.some(c=>s[c.name]?.[slot.key]?.resource===r)}
+function loadDay(s,t,d){let n=0;S.classes.forEach(c=>Object.entries(s[c.name]||{}).forEach(([k,v])=>{if(k.startsWith(d+'-')&&v.teacher===t)n++}));return n}
+function sameDaySubject(s,c,d,sub){return Object.entries(s[c]||{}).filter(([k,v])=>k.startsWith(d+'-')&&v.subject===sub).length}
+function generate(){if(!S.teachers.length||!S.classes.length||!S.subjects.length||!S.allocations.length)return message('Please add teachers, classes, subjects and allocations first.','warn');let req=[];S.allocations.forEach(a=>{for(let i=0;i<a.periodsPerWeek;i++)req.push({...a})});let attempts=Number(attempts.value)||1000,best,bestUn=1e9;for(let z=0;z<attempts;z++){let s={};S.classes.forEach(c=>s[c.name]={});let un=[];for(let a of [...req].sort(()=>Math.random()-.5)){let c=S.classes.find(x=>x.name===a.className),t=T(a.teacher),cand=classSlots(c).filter(sl=>!s[a.className][sl.key]&&t.blocked!==sl.key&&!teacherBusy(s,a.teacher,sl)&&!resourceBusy(s,a.resource,sl)&&loadDay(s,a.teacher,sl.day)<t.maxDaily);if(!cand.length){un.push(a);continue}cand.sort((x,y)=>(sameDaySubject(s,a.className,x.day,a.subject)+Math.random())-(sameDaySubject(s,a.className,y.day,a.subject)+Math.random()));let sl=cand[0];s[a.className][sl.key]={subject:a.subject,teacher:a.teacher,resource:a.resource||''}}if(un.length<bestUn){best=s;bestUn=un.length;if(!bestUn)break}}S.schedule=best||{};save();refreshAll();checkClashes();message(bestUn?`Generated timetable, but ${bestUn} lesson(s) could not be placed.`:'Timetable generated successfully with no unplaced lessons.',bestUn?'warn':'ok')}
+function message(m,t){generateMessage.innerHTML=`<div class="notice ${t}">${m}</div>`}
+function clearSchedule(){if(confirm('Clear current timetable?')){S.schedule={};S.substitutions=[];save();refreshAll()}}
+function checkClashes(){let issues=[],map={};S.classes.forEach(c=>Object.entries(S.schedule[c.name]||{}).forEach(([slot,x])=>{(map[slot]??=[]).push({className:c.name,...x})}));Object.entries(map).forEach(([slot,a])=>{let m={};a.forEach(x=>(m[x.teacher]??=[]).push(x));Object.entries(m).forEach(([t,z])=>{if(z.length>1)issues.push(`${t} has a double booking at ${slot}`)})});clashBox.innerHTML=issues.length?`<div class="notice bad">${issues.join('<br>')}</div>`:'<div class="notice ok">No teacher clashes found.</div>'}
+function showAbsentLesson(){let t=absTeacher.value,d=subDay.value,p=Number(subPeriod.value),lessons=[];S.classes.forEach(c=>{let x=S.schedule[c.name]?.[K(d,p)];if(x?.teacher===t)lessons.push({className:c.name,...x})});if(!lessons.length){subSuggestion.innerHTML='<div class="notice warn">This teacher has no lesson in the selected period.</div>';return}let x=lessons[0],cand=S.teachers.filter(a=>a.name!==t&&a.blocked!==K(d,p)&&!teacherBusy(S.schedule,a.name,{key:K(d,p)})).map(a=>({a,match:S.allocations.some(z=>z.teacher===a.name&&z.subject===x.subject),load:S.allocations.filter(z=>z.teacher===a.name).reduce((n,z)=>n+z.periodsPerWeek,0)})).sort((a,b)=>(b.match-a.match)||(a.load-b.load));subSuggestion.innerHTML=`<div class="notice ok"><b>Absent lesson:</b> Class ${x.className} · ${x.subject}<div class="table-wrap" style="margin-top:12px"><table><tr><th>Rank</th><th>Teacher</th><th>Subject Match</th><th>Weekly Load</th><th>Action</th></tr>${cand.map((q,i)=>`<tr><td>${i+1}</td><td><b>${q.a.name}</b></td><td>${q.match?'Yes':'No'}</td><td>${q.load}</td><td><button class="secondary-btn" onclick="assignSub('${q.a.name.replace(/'/g,"\\'")}','${t.replace(/'/g,"\\'")}','${d}',${p},'${x.className}','${x.subject}')">Assign</button></td></tr>`).join('')}</table></div></div>`}
+function assignSub(sub,abs,day,period,className,subject){S.substitutions.push({substitute:sub,absent:abs,day,period,className,subject});save();renderSubRecords();alert(sub+' assigned successfully.')}
+function renderSubRecords(){let e=subRecords;if(!e)return;e.innerHTML=S.substitutions.length?`<div class="table-wrap"><table><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Substitute</th></tr>${S.substitutions.map(x=>`<tr><td>${x.day}</td><td>P${x.period}</td><td>${x.className}</td><td>${x.subject}</td><td>${x.absent}</td><td><b>${x.substitute}</b></td></tr>`).join('')}</table></div>`:'<div class="empty">No substitutions recorded.</div>'}
+function renderClassReport(){let n=reportClass.value,c=S.classes.find(x=>x.name===n);if(!c)return;let s=S.schedule[n]||{},ct=c.classTeacher?`<span class="muted">Class Teacher: <b>${c.classTeacher}</b></span>`:'<span class="muted">Class Teacher: Not assigned</span>',h=`<h3>Class ${n}</h3><div style="margin-bottom:14px">${ct}</div>`<div class="table-wrap"><table class="timetable"><tr><th>Day</th>`;for(let p=1;p<=c.periodsPerDay;p++)h+=`<th>P${p}</th>`;h+='</tr>';S.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=c.periodsPerDay;p++){let x=s[K(d,p)];h+=`<td>${x?`<div class="lesson">${x.subject}</div><div class="teacher-small">${x.teacher}</div>`:'<span class="muted">Free</span>'}</td>`}h+='</tr>'});reportArea.innerHTML=h+'</table></div>'}
+function renderTeacherReport(){let t=reportTeacher.value,max=Math.max(1,...S.classes.map(c=>c.periodsPerDay)),h=`<h3>${t}</h3><div class="table-wrap"><table class="timetable"><tr><th>Day</th>`;for(let p=1;p<=max;p++)h+=`<th>P${p}</th>`;h+='</tr>';S.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=max;p++){let f=null;S.classes.forEach(c=>{let x=S.schedule[c.name]?.[K(d,p)];if(x?.teacher===t)f={...x,className:c.name}});h+=`<td>${f?`<div class="lesson">${f.className} · ${f.subject}</div>`:'<span class="muted">Free</span>'}</td>`}h+='</tr>'});reportArea.innerHTML=h+'</table></div>'}
+function exportData(){let b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='school-timetable-backup.json';a.click()}
+function restoreData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{S=JSON.parse(r.result);save();refreshAll();alert('Backup restored successfully.')}catch{alert('Invalid backup file.')}};r.readAsText(f)}
+function resetData(){if(confirm('Remove all data?')){S={days:['Mon','Tue','Wed','Thu','Fri'],teachers:[],classes:[],subjects:[],allocations:[],schedule:{},substitutions:[]};save();refreshAll()}}
+function refreshStats(){stTeachers.textContent=S.teachers.length;stClasses.textContent=S.classes.length;stSubjects.textContent=S.subjects.length;stLessons.textContent=Object.values(S.schedule).reduce((n,x)=>n+Object.keys(x||{}).length,0)}
+function refreshAll(){S.classes.forEach(c=>{if(typeof c.classTeacher==='undefined')c.classTeacher=''});fillSelectors();renderTeachers();renderClasses();renderClassTeachers();renderSubjects();renderAllocations();renderSubRecords();refreshStats()}
+load();refreshAll();
 </script>
 </body>
 </html>
