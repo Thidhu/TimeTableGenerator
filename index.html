@@ -3,346 +3,265 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>School Timetable & Substitution Manager</title>
+<title>School Timetable Manager</title>
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#667085;--line:#d9e0ea;--brand:#315d9b;--ok:#18794e;--bad:#b42318;--warn:#b54708}
-*{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
-header{background:var(--brand);color:white;padding:18px 24px;position:sticky;top:0;z-index:5}
-header h1{margin:0;font-size:22px} header p{margin:5px 0 0;opacity:.9;font-size:13px}
-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-nav button,.btn{border:0;border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:600}
-nav button{background:rgba(255,255,255,.16);color:#fff}.btn{background:var(--brand);color:#fff}.btn.secondary{background:#e9eef7;color:var(--brand)}.btn.danger{background:var(--bad)}
-main{max-width:1450px;margin:20px auto;padding:0 18px}.panel{display:none}.panel.active{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(16,24,40,.04)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
-h2,h3{margin-top:0}.hint{color:var(--muted);font-size:13px;line-height:1.5}
-textarea{width:100%;min-height:420px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;border:1px solid var(--line);border-radius:8px;padding:12px}
-input,select{width:100%;padding:8px;border:1px solid var(--line);border-radius:7px;background:#fff}
-label{font-size:12px;font-weight:700;color:#475467;display:block;margin-bottom:5px}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.row>*{flex:1;min-width:140px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff}th,td{border:1px solid var(--line);padding:8px;vertical-align:top;text-align:left}th{background:#edf3fb;color:#1f3d68}
-.timetable td{min-width:115px;height:60px}.slot-subj{font-weight:700}.slot-teacher{font-size:11px;color:var(--muted);margin-top:3px}
-.status{padding:10px 12px;border-radius:8px;margin:10px 0;font-weight:600}.status.ok{background:#eaf7ef;color:var(--ok)}.status.bad{background:#fdecec;color:var(--bad)}.status.warn{background:#fff5e8;color:var(--warn)}
-.badge{display:inline-block;padding:3px 8px;border-radius:20px;background:#edf3fb;color:#315d9b;font-size:12px;font-weight:700;margin:2px}
-.small{font-size:12px;color:var(--muted)}.scroll{overflow:auto}.hidden{display:none}
-pre{white-space:pre-wrap;background:#0f172a;color:#e5e7eb;padding:12px;border-radius:8px;font-size:12px;max-height:300px;overflow:auto}
+:root{
+  --primary:#1f4b99;--primary2:#16366f;--bg:#f4f7fb;--card:#ffffff;
+  --text:#172033;--muted:#667085;--border:#e2e8f0;--success:#16794b;
+  --danger:#c23b3b;--warning:#b7791f;--sidebar:#102a56;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:flex;min-height:100vh}
+.sidebar{width:250px;background:var(--sidebar);color:#fff;padding:22px 14px;position:fixed;inset:0 auto 0 0}
+.brand{padding:4px 12px 24px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:16px}
+.brand h1{font-size:19px;margin:0 0 6px}.brand p{font-size:12px;margin:0;opacity:.75;line-height:1.4}
+.nav button{width:100%;border:0;background:transparent;color:#dbe7ff;text-align:left;padding:12px;border-radius:9px;margin:3px 0;font-size:14px;cursor:pointer}
+.nav button:hover,.nav button.active{background:#28549a;color:#fff}
+.main{margin-left:250px;width:calc(100% - 250px);padding:26px;max-width:1800px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.topbar h2{margin:0;font-size:25px}.topbar p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.page{display:none}.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 2px 8px rgba(15,23,42,.035)}
+.card h3{margin:0 0 6px;font-size:17px}.muted{color:var(--muted);font-size:13px;line-height:1.5}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.stat{padding:18px;border-radius:12px;background:#fff;border:1px solid var(--border)}.stat b{font-size:28px;display:block;color:var(--primary)}.stat span{font-size:13px;color:var(--muted)}
+label{font-size:12px;font-weight:700;color:#475467;display:block;margin-bottom:6px}
+input,select{width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:14px;color:var(--text)}
+input:focus,select:focus{outline:2px solid #dbe7ff;border-color:#84a5dc}
+button{font-family:inherit}.btn{border:0;background:var(--primary);color:#fff;border-radius:8px;padding:10px 15px;font-weight:700;cursor:pointer;font-size:13px}.btn:hover{background:var(--primary2)}
+.btn.secondary{background:#eef3fb;color:var(--primary)}.btn.success{background:var(--success)}.btn.danger{background:#fff0f0;color:var(--danger)}.btn.small{padding:6px 9px;font-size:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.form-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:end}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:11px 10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle}th{background:#f8fafc;color:#475467;font-size:12px}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#edf3fb;color:var(--primary);font-size:11px;font-weight:700}
+.empty{padding:34px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:10px}
+.notice{padding:12px 14px;border-radius:9px;margin-top:12px;font-size:13px;font-weight:600}.notice.ok{background:#ecfdf3;color:var(--success)}.notice.warn{background:#fffaeb;color:var(--warning)}.notice.bad{background:#fff1f1;color:var(--danger)}
+.timetable td{height:64px;min-width:105px}.lesson{font-weight:700}.teacher{font-size:11px;color:var(--muted);margin-top:4px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.48);z-index:10;align-items:center;justify-content:center;padding:20px}.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:15px;padding:22px;width:min(680px,100%);max-height:90vh;overflow:auto}.modal h3{margin-top:0}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.footer-note{font-size:12px;color:var(--muted)}
+@media(max-width:900px){.sidebar{width:70px;padding:14px 8px}.brand h1,.brand p,.nav span{display:none}.nav button{text-align:center}.main{margin-left:70px;width:calc(100% - 70px);padding:16px}.g2,.g3,.g4,.form-grid{grid-template-columns:1fr}.sidebar .brand{padding:8px 0 18px}}
 </style>
 </head>
 <body>
-<header>
-<h1>School Timetable & Substitution Manager</h1>
-<p>Auto-generate timetables, detect teacher clashes, and manage substitutions for small or very large schools.</p>
-<nav>
-<button onclick="showTab('home')">Home</button>
-<button onclick="showTab('data')">School Data</button>
-<button onclick="showTab('generate')">Generate</button>
-<button onclick="showTab('timetable')">Timetable</button>
-<button onclick="showTab('teachers')">Teachers</button>
-<button onclick="showTab('clashes')">Clash Check</button>
-<button onclick="showTab('substitution')">Substitution</button>
-</nav>
-</header>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><h1>School Timetable</h1><p>Professional timetable and substitution manager</p></div>
+  <div class="nav">
+    <button class="active" onclick="openPage('dashboard',this)">⌂ <span>Dashboard</span></button>
+    <button onclick="openPage('teachers',this)">♟ <span>Teachers</span></button>
+    <button onclick="openPage('classes',this)">▦ <span>Classes</span></button>
+    <button onclick="openPage('allocations',this)">◫ <span>Subject Allocation</span></button>
+    <button onclick="openPage('generate',this)">⚙ <span>Generate Timetable</span></button>
+    <button onclick="openPage('view',this)">▤ <span>View Timetable</span></button>
+    <button onclick="openPage('substitution',this)">↺ <span>Substitution</span></button>
+    <button onclick="openPage('backup',this)">⇩ <span>Backup & Restore</span></button>
+  </div>
+</aside>
 
-<main>
-<section id="home" class="panel active">
-<div class="card">
-<h2>Welcome</h2>
-<p>This first version is designed for your yearly timetable work. It can handle 100+ teachers because the data structure is not limited to a fixed number of teachers or classes.</p>
-<div class="grid3">
-<div class="card"><h3>1. Enter Data</h3><p class="hint">Teachers, classes, subjects, weekly periods, unavailable periods and special resources.</p></div>
-<div class="card"><h3>2. Generate</h3><p class="hint">The tool tries different arrangements and prevents a teacher or shared resource from being used twice in the same slot.</p></div>
-<div class="card"><h3>3. Substitute</h3><p class="hint">Choose an absent teacher and period. The tool finds teachers who are free and ranks suitable substitutes.</p></div>
+<main class="main">
+<div class="topbar"><div><h2 id="pageTitle">Dashboard</h2><p id="pageSub">Manage your school timetable in one place.</p></div><button class="btn secondary" onclick="saveLocal()">Save Changes</button></div>
+
+<section id="dashboard" class="page active">
+<div class="grid g4">
+<div class="stat"><b id="statTeachers">0</b><span>Teachers</span></div>
+<div class="stat"><b id="statClasses">0</b><span>Classes</span></div>
+<div class="stat"><b id="statAllocations">0</b><span>Subject Allocations</span></div>
+<div class="stat"><b id="statLessons">0</b><span>Scheduled Lessons</span></div>
 </div>
-<div class="status warn">Important: For very complicated school rules, a fully automatic timetable is a constraint-solving problem. This version gives a practical automatic generator and reports anything it cannot place, instead of silently creating clashes.</div>
+<div class="card" style="margin-top:18px"><h3>Getting Started</h3>
+<p class="muted">1. Add teachers. 2. Add classes. 3. Add subject allocations. 4. Generate the timetable. 5. Check substitutions whenever a teacher is absent.</p>
+<div class="actions"><button class="btn" onclick="openPage('teachers')">Add Teachers</button><button class="btn secondary" onclick="openPage('classes')">Add Classes</button><button class="btn secondary" onclick="openPage('allocations')">Allocate Subjects</button></div>
 </div>
 </section>
 
-<section id="data" class="panel">
-<div class="grid2">
-<div class="card">
-<h2>School Data</h2>
-<p class="hint">The data is stored as JSON so it can contain any number of teachers. You can save it and reuse it next year.</p>
-<textarea id="dataJson"></textarea>
-<div class="actions">
-<button class="btn" onclick="loadDataFromEditor()">Load / Validate Data</button>
-<button class="btn secondary" onclick="downloadData()">Download Data Backup</button>
-<label class="btn secondary" style="display:inline-block;width:auto">Load Data File<input id="fileInput" type="file" accept=".json" class="hidden" onchange="loadFile(event)"></label>
-<button class="btn secondary" onclick="loadSample()">Load Kyidsa Sample Structure</button>
-</div>
-</div>
-<div class="card">
-<h2>Data Format</h2>
-<p class="hint">The main information is:</p>
-<pre>{
-  "school": "My School",
-  "days": ["Mon","Tue","Wed","Thu","Fri"],
-  "classes": [{"name":"IV","periodsPerDay":8}],
-  "teachers": [{
-    "name":"Teacher A",
-    "maxDaily":6,
-    "blocked":["Mon-P1","Fri-P8"]
-  }],
-  "allocations": [{
-    "className":"IV",
-    "subject":"Maths",
-    "teacher":"Teacher A",
-    "periodsPerWeek":9,
-    "resource":""
-  }]
-}</pre>
-<p class="hint">For a shared ICT lab, put the same resource name, for example <b>ICT Lab</b>, in every allocation that needs it. The generator will prevent double use.</p>
-</div>
-</div>
+<section id="teachers" class="page">
+<div class="card"><h3>Teachers</h3><p class="muted">Add, edit or remove teachers. There is no fixed limit, so the same system can be used for more than 100 teachers.</p>
+<div class="actions"><button class="btn" onclick="showTeacherModal()">+ Add Teacher</button></div></div>
+<div class="card"><div id="teacherTable"></div></div>
 </section>
 
-<section id="generate" class="panel">
-<div class="card">
-<h2>Generate Timetable</h2>
-<div class="grid3">
-<div><label>Random attempts</label><input id="attempts" type="number" value="800" min="1" max="10000"></div>
-<div><label>Prefer different subjects each day</label><select id="spread"><option value="yes">Yes</option><option value="no">No</option></select></div>
-<div><label>Keep existing timetable?</label><select id="keepExisting"><option value="no">Replace</option><option value="yes">Use existing as fixed</option></select></div>
-</div>
-<div class="actions"><button class="btn" onclick="generate()">Generate Automatically</button><button class="btn secondary" onclick="clearSchedule()">Clear Timetable</button></div>
-<div id="genStatus"></div>
-</div>
-<div class="card">
-<h3>How the generator decides</h3>
-<p class="hint">It schedules difficult items first, checks class availability, teacher availability, blocked periods, shared resources and weekly requirements. It also penalizes unnecessary repetition of the same subject on the same day.</p>
-</div>
+<section id="classes" class="page">
+<div class="card"><h3>Classes</h3><p class="muted">Add each class and the number of periods per day.</p>
+<div class="form-grid"><div><label>Class Name</label><input id="newClassName" placeholder="Example: IV"></div><div><label>Periods per Day</label><input id="newClassPeriods" type="number" value="8" min="1"></div><div><button class="btn" onclick="addClass()">+ Add Class</button></div></div></div>
+<div class="card"><div id="classTable"></div></div>
 </section>
 
-<section id="timetable" class="panel">
-<div class="card">
-<h2>Class Timetable</h2>
-<div class="row"><div><label>Select Class</label><select id="classSelect" onchange="renderClassTimetable()"></select></div><div style="flex:0"><button class="btn" onclick="printCurrent()">Print / Save as PDF</button></div></div>
-<div id="classTimetable" class="scroll"></div>
+<section id="allocations" class="page">
+<div class="card"><h3>Subject Allocation</h3><p class="muted">Choose the class, subject, teacher and number of periods per week. Add a shared resource such as ICT Lab if required.</p>
+<div class="form-grid">
+<div><label>Class</label><select id="aClass"></select></div>
+<div><label>Subject</label><input id="aSubject" placeholder="Example: Maths"></div>
+<div><label>Teacher</label><select id="aTeacher"></select></div>
 </div>
+<div class="form-grid" style="margin-top:12px">
+<div><label>Periods per Week</label><input id="aPeriods" type="number" min="1" value="5"></div>
+<div><label>Shared Resource (Optional)</label><input id="aResource" placeholder="Example: ICT Lab"></div>
+<div><button class="btn" onclick="addAllocation()">+ Add Allocation</button></div>
+</div>
+</div>
+<div class="card"><div id="allocationTable"></div></div>
 </section>
 
-<section id="teachers" class="panel">
-<div class="card">
-<h2>Teacher Timetable</h2>
-<div class="row"><div><label>Select Teacher</label><select id="teacherSelect" onchange="renderTeacherTimetable()"></select></div></div>
-<div id="teacherTimetable" class="scroll"></div>
+<section id="generate" class="page">
+<div class="card"><h3>Generate Timetable</h3><p class="muted">The generator checks class availability, teacher availability, blocked periods, maximum daily workload and shared resources.</p>
+<div class="grid g3">
+<div><label>Generation Attempts</label><input id="attempts" type="number" value="1000" min="1" max="10000"></div>
+<div><label>School Days</label><select id="dayCount" onchange="updateDays()"><option value="5">5 Days</option><option value="6">6 Days</option></select></div>
+<div><label>Same Subject Spreading</label><select id="spread"><option value="yes">Avoid unnecessary repetition</option><option value="no">No preference</option></select></div>
 </div>
+<div class="actions"><button class="btn success" onclick="generate()">Generate Automatically</button><button class="btn secondary" onclick="checkClashes()">Check Current Timetable</button><button class="btn danger" onclick="clearSchedule()">Clear Timetable</button></div>
+<div id="generatorMessage"></div>
+</div>
+<div class="card"><h3>Current Clash Status</h3><div id="clashBox" class="muted">Generate or check a timetable to see the result.</div></div>
 </section>
 
-<section id="clashes" class="panel">
-<div class="card">
-<h2>Clash Checker</h2>
-<div class="actions"><button class="btn" onclick="runClashCheck()">Check All Clashes</button></div>
-<div id="clashResults"></div>
-</div>
+<section id="view" class="page">
+<div class="card"><div class="grid g2"><div><label>View by Class</label><select id="viewClass" onchange="renderClassView()"></select></div><div><label>View by Teacher</label><select id="viewTeacher" onchange="renderTeacherView()"></select></div></div></div>
+<div class="card"><div id="timetableView"></div></div>
 </section>
 
-<section id="substitution" class="panel">
-<div class="card">
-<h2>Substitution Manager</h2>
-<div class="grid3">
-<div><label>Absent Teacher</label><select id="absentTeacher" onchange="refreshAbsenceLessons()"></select></div>
-<div><label>Day</label><select id="subDay" onchange="refreshAbsenceLessons()"></select></div>
-<div><label>Period</label><select id="subPeriod" onchange="refreshAbsenceLessons()"></select></div>
-</div>
-<div id="absenceLessons"></div>
-</div>
-<div class="card">
-<h3>Best Substitute Suggestions</h3>
-<p class="hint">Teachers are ranked by subject experience first, then whether they are free, then lower workload.</p>
-<div id="subSuggestions"></div>
-</div>
-<div class="card">
-<h3>Substitution Record</h3>
-<div id="subRecords"></div>
-</div>
+<section id="substitution" class="page">
+<div class="card"><h3>Find a Substitute</h3><p class="muted">Select the absent teacher, day and period. The system finds teachers who are free at that time and ranks suitable substitutes.</p>
+<div class="grid g3"><div><label>Absent Teacher</label><select id="absentTeacher" onchange="showAbsentLessons()"></select></div><div><label>Day</label><select id="subDay" onchange="showAbsentLessons()"></select></div><div><label>Period</label><select id="subPeriod" onchange="showAbsentLessons()"></select></div></div>
+<div id="absentLessons" style="margin-top:14px"></div></div>
+<div class="card"><h3>Substitution Records</h3><div id="subTable"></div></div>
+</section>
+
+<section id="backup" class="page">
+<div class="card"><h3>Backup Your School Data</h3><p class="muted">Download your teachers, classes, allocations, timetable and substitutions. You can restore the same file later.</p>
+<div class="actions"><button class="btn" onclick="exportBackup()">Download Backup</button><label class="btn secondary" style="display:inline-block;width:auto">Restore Backup<input type="file" accept=".json" style="display:none" onchange="restoreBackup(event)"></label><button class="btn danger" onclick="resetAll()">Reset Everything</button></div></div>
 </section>
 </main>
+</div>
+
+<div id="teacherModalBg" class="modal-bg"><div class="modal">
+<h3 id="teacherModalTitle">Add Teacher</h3>
+<div class="modal-grid">
+<div><label>Teacher Name</label><input id="tName" placeholder="Example: Thinley Wangchuk"></div>
+<div><label>Maximum Periods per Day</label><input id="tMaxDaily" type="number" value="6" min="1"></div>
+<div><label>Blocked Day</label><select id="tBlockDay"><option value="">None</option></select></div>
+<div><label>Blocked Period</label><input id="tBlockPeriod" type="number" min="1" placeholder="Example: 6"></div>
+</div>
+<p class="muted" style="margin-top:12px">Blocked period is optional. You can edit a teacher later if their availability changes.</p>
+<div class="actions"><button class="btn" onclick="saveTeacher()">Save Teacher</button><button class="btn secondary" onclick="closeTeacherModal()">Cancel</button></div>
+</div></div>
 
 <script>
-let state = {
-  data: null,
-  schedule: {},
-  substitutions: []
-};
+let S={days:["Mon","Tue","Wed","Thu","Fri"],teachers:[],classes:[],allocations:[],schedule:{},substitutions:[]};
+let editingTeacher=null;
 
-const sampleData = {"school": "Kyidsa Primary School", "days": ["Mon", "Tue", "Wed", "Thu", "Fri"], "classes": [{"name": "PP", "periodsPerDay": 5}, {"name": "I", "periodsPerDay": 5}, {"name": "II", "periodsPerDay": 5}, {"name": "III", "periodsPerDay": 5}, {"name": "IV", "periodsPerDay": 8}, {"name": "V", "periodsPerDay": 8}, {"name": "VI", "periodsPerDay": 8}], "teachers": [{"name": "Bhim Sir", "maxDaily": 8, "blocked": []}, {"name": "Dadhi Sir", "maxDaily": 8, "blocked": []}, {"name": "Lop Sangay Dawa", "maxDaily": 8, "blocked": []}, {"name": "Lop Thinley Wangchuck", "maxDaily": 8, "blocked": []}, {"name": "Lop Ugyen Dorji Doya", "maxDaily": 8, "blocked": []}, {"name": "Ms. Sujana Rai", "maxDaily": 8, "blocked": []}, {"name": "Ms. Tshering Yangden", "maxDaily": 8, "blocked": []}, {"name": "Ms. Tshueltrim Zangmo", "maxDaily": 8, "blocked": []}, {"name": "Principal Sir", "maxDaily": 8, "blocked": []}], "allocations": [{"className": "PP", "subject": "Library", "teacher": "Ms. Tshueltrim Zangmo", "periodsPerWeek": 1, "resource": ""}, {"className": "PP", "subject": "English", "teacher": "Ms. Tshueltrim Zangmo", "periodsPerWeek": 5, "resource": ""}, {"className": "PP", "subject": "Dzongkha", "teacher": "Lop Sangay Dawa", "periodsPerWeek": 5, "resource": ""}, {"className": "PP", "subject": "S/T", "teacher": "Ms. Tshering Yangden", "periodsPerWeek": 6, "resource": ""}, {"className": "PP", "subject": "Maths", "teacher": "Principal Sir", "periodsPerWeek": 5, "resource": ""}, {"className": "PP", "subject": "HPE", "teacher": "Dadhi Sir", "periodsPerWeek": 2, "resource": ""}, {"className": "PP", "subject": "Art", "teacher": "Ms. Tshueltrim Zangmo", "periodsPerWeek": 1, "resource": ""}, {"className": "I", "subject": "Maths", "teacher": "Bhim Sir", "periodsPerWeek": 5, "resource": ""}, {"className": "I", "subject": "S/T", "teacher": "Lop Ugyen Dorji Doya", "periodsPerWeek": 6, "resource": ""}, {"className": "I", "subject": "English", "teacher": "Ms. Tshueltrim Zangmo", "periodsPerWeek": 5, "resource": ""}, {"className": "I", "subject": "HPE", "teacher": "Dadhi Sir", "periodsPerWeek": 2, "resource": ""}, {"className": "I", "subject": "Dzongkha", "teacher": "Lop Sangay Dawa", "periodsPerWeek": 5, "resource": ""}, {"className": "I", "subject": "Library", "teacher": "Ms. Tshueltrim Zangmo", "periodsPerWeek": 1, "resource": ""}, {"className": "I", "subject": "Art", "teacher": "Bhim Sir", "periodsPerWeek": 1, "resource": ""}, {"className": "II", "subject": "Art", "teacher": "Lop Thinley Wangchuck", "periodsPerWeek": 1, "resource": ""}, {"className": "II", "subject": "Library", "teacher": "Ms. Tshering Yangden", "periodsPerWeek": 1, "resource": ""}, {"className": "II", "subject": "Dzongkha", "teacher": "Lop Thinley Wangchuck", "periodsPerWeek": 6, "resource": ""}, {"className": "II", "subject": "Maths", "teacher": "Lop Ugyen Dorji Doya", "periodsPerWeek": 5, "resource": ""}, {"className": "II", "subject": "English", "teacher": "Ms. Tshering Yangden", "periodsPerWeek": 6, "resource": ""}, {"className": "II", "subject": "HPE", "teacher": "Dadhi Sir", "periodsPerWeek": 2, "resource": ""}, {"className": "II", "subject": "ICT", "teacher": "Bhim Sir", "periodsPerWeek": 4, "resource": ""}, {"className": "III", "subject": "Library", "teacher": "Lop Ugyen Dorji Doya", "periodsPerWeek": 1, "resource": ""}, {"className": "III", "subject": "HPE", "teacher": "Dadhi Sir", "periodsPerWeek": 2, "resource": ""}, {"className": "III", "subject": "Dzongkha", "teacher": "Lop Ugyen Dorji Doya", "periodsPerWeek": 6, "resource": ""}, {"className": "III", "subject": "English", "teacher": "Ms. Sujana Rai", "periodsPerWeek": 6, "resource": ""}, {"className": "III", "subject": "ICT", "teacher": "Bhim Sir", "periodsPerWeek": 4, "resource": ""}, {"className": "III", "subject": "Maths", "teacher": "Ms. Tshueltrim Zangmo", "periodsPerWeek": 5, "resource": ""}, {"className": "III", "subject": "Art", "teacher": "Lop Ugyen Dorji Doya", "periodsPerWeek": 1, "resource": ""}, {"className": "IV", "subject": "English", "teacher": "Ms. Sujana Rai", "periodsPerWeek": 9, "resource": ""}, {"className": "IV", "subject": "Maths", "teacher": "Ms. Tshering Yangden", "periodsPerWeek": 9, "resource": ""}, {"className": "IV", "subject": "Dzongkha", "teacher": "Lop Thinley Wangchuck", "periodsPerWeek": 8, "resource": ""}, {"className": "IV", "subject": "Science", "teacher": "Lop Ugyen Dorji Doya", "periodsPerWeek": 7, "resource": ""}, {"className": "IV", "subject": "HPE", "teacher": "Dadhi Sir", "periodsPerWeek": 2, "resource": ""}, {"className": "IV", "subject": "DTI", "teacher": "Lop Thinley Wangchuck", "periodsPerWeek": 4, "resource": ""}, {"className": "IV", "subject": "Art", "teacher": "Lop Thinley Wangchuck", "periodsPerWeek": 1, "resource": ""}, {"className": "V", "subject": "Dzongkha", "teacher": "Lop Sangay Dawa", "periodsPerWeek": 8, "resource": ""}, {"className": "V", "subject": "Science", "teacher": "Principal Sir", "periodsPerWeek": 7, "resource": ""}, {"className": "V", "subject": "English", "teacher": "Ms. Sujana Rai", "periodsPerWeek": 9, "resource": ""}, {"className": "V", "subject": "Maths", "teacher": "Ms. Tshueltrim Zangmo", "periodsPerWeek": 9, "resource": ""}, {"className": "V", "subject": "ICT", "teacher": "Lop Thinley Wangchuck", "periodsPerWeek": 4, "resource": ""}, {"className": "V", "subject": "HPE", "teacher": "Dadhi Sir", "periodsPerWeek": 2, "resource": ""}, {"className": "V", "subject": "Art", "teacher": "Lop Sangay Dawa", "periodsPerWeek": 1, "resource": ""}, {"className": "VI", "subject": "Maths", "teacher": "Ms. Tshering Yangden", "periodsPerWeek": 9, "resource": ""}, {"className": "VI", "subject": "Dzongkha", "teacher": "Lop Sangay Dawa", "periodsPerWeek": 8, "resource": ""}, {"className": "VI", "subject": "ICT", "teacher": "Bhim Sir", "periodsPerWeek": 4, "resource": ""}, {"className": "VI", "subject": "Science", "teacher": "Principal Sir", "periodsPerWeek": 7, "resource": ""}, {"className": "VI", "subject": "English", "teacher": "Ms. Sujana Rai", "periodsPerWeek": 9, "resource": ""}, {"className": "VI", "subject": "HPE", "teacher": "Dadhi Sir", "periodsPerWeek": 2, "resource": ""}, {"className": "VI", "subject": "Art", "teacher": "Ms. Tshering Yangden", "periodsPerWeek": 1, "resource": ""}], "constraints": {"teacherBlocked": [], "resourceRules": {}}};
-
-function key(day,p){return day+"-P"+p}
-function parseSlot(k){let [d,p]=k.split("-P"); return {day:d,p:Number(p)}}
-function showTab(id){document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active"); if(id==="timetable")refreshSelectors(); if(id==="teachers")refreshSelectors(); if(id==="substitution")refreshSelectors();}
-function setStatus(el,msg,type="ok"){el.innerHTML=`<div class="status ${type}">${msg}</div>`}
-function loadSample(){state.data=structuredClone(sampleData);state.schedule={};state.substitutions=[];syncEditor();refreshSelectors();alert("Sample structure loaded. You can edit the JSON for next year.");}
-function syncEditor(){document.getElementById("dataJson").value=JSON.stringify(state.data,null,2)}
-function loadDataFromEditor(){
- try{let d=JSON.parse(document.getElementById("dataJson").value);validateData(d);state.data=d;state.schedule={};state.substitutions=[];refreshSelectors();alert("Data loaded successfully.");}
- catch(e){alert("Data error: "+e.message)}
+function loadLocal(){try{let x=JSON.parse(localStorage.getItem("schoolTimetableProfessional"));if(x)S=x}catch(e){}}
+function saveLocal(){localStorage.setItem("schoolTimetableProfessional",JSON.stringify(S));flash("Changes saved in this browser.","ok")}
+function flash(msg,type="ok"){document.getElementById("generatorMessage").innerHTML=`<div class="notice ${type}">${msg}</div>`}
+function openPage(id,btn){
+document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");
+document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));if(btn)btn.classList.add("active");
+let titles={dashboard:["Dashboard","Manage your school timetable in one place."],teachers:["Teachers","Add, edit or remove teachers."],classes:["Classes","Manage classes and daily periods."],allocations:["Subject Allocation","Assign subjects and weekly periods to teachers."],generate:["Generate Timetable","Create and verify the school timetable."],view:["View Timetable","View class and teacher schedules."],substitution:["Substitution","Find available replacement teachers."],backup:["Backup & Restore","Protect and reuse your school data."]};
+document.getElementById("pageTitle").textContent=titles[id][0];document.getElementById("pageSub").textContent=titles[id][1];
+refreshAll();
 }
-function validateData(d){
- if(!d||!Array.isArray(d.days)||!Array.isArray(d.classes)||!Array.isArray(d.teachers)||!Array.isArray(d.allocations))throw Error("Missing days, classes, teachers or allocations arrays.");
- let ts=new Set(d.teachers.map(x=>x.name));let cs=new Set(d.classes.map(x=>x.name));
- d.allocations.forEach((a,i)=>{if(!cs.has(a.className))throw Error(`Allocation ${i+1}: class not found`);if(!ts.has(a.teacher))throw Error(`Allocation ${i+1}: teacher not found`);if(!a.periodsPerWeek||a.periodsPerWeek<1)throw Error(`Allocation ${i+1}: periodsPerWeek must be at least 1`)})
+function refreshAll(){renderStats();renderTeachers();renderClasses();fillSelectors();renderAllocations();renderSubTable();renderClassView();}
+function renderStats(){document.getElementById("statTeachers").textContent=S.teachers.length;document.getElementById("statClasses").textContent=S.classes.length;document.getElementById("statAllocations").textContent=S.allocations.length;document.getElementById("statLessons").textContent=Object.values(S.schedule).reduce((n,x)=>n+Object.keys(x||{}).length,0)}
+function renderTeachers(){
+let el=document.getElementById("teacherTable");if(!S.teachers.length){el.innerHTML='<div class="empty">No teachers added yet. Click <b>Add Teacher</b> to begin.</div>';return}
+el.innerHTML=`<div class="table-wrap"><table><tr><th>#</th><th>Teacher</th><th>Max Daily Periods</th><th>Blocked Period</th><th>Action</th></tr>${S.teachers.map((t,i)=>`<tr><td>${i+1}</td><td><b>${t.name}</b></td><td>${t.maxDaily}</td><td>${t.blocked||"None"}</td><td><button class="btn secondary small" onclick="showTeacherModal(${i})">Edit</button> <button class="btn danger small" onclick="deleteTeacher(${i})">Remove</button></td></tr>`).join("")}</table></div>`;
 }
-function downloadData(){
- if(!state.data){alert("Load data first.");return}
- const blob=new Blob([JSON.stringify({data:state.data,schedule:state.schedule,substitutions:state.substitutions},null,2)],{type:"application/json"});
- const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=(state.data.school||"school")+"-timetable-backup.json";a.click();
+function showTeacherModal(i=null){
+editingTeacher=i;document.getElementById("teacherModalTitle").textContent=i===null?"Add Teacher":"Edit Teacher";
+let t=i===null?{name:"",maxDaily:6,blocked:""}:S.teachers[i];document.getElementById("tName").value=t.name;document.getElementById("tMaxDaily").value=t.maxDaily;
+let b=(t.blocked||"").split("-P");document.getElementById("tBlockDay").value=b.length===2?b[0]:"";document.getElementById("tBlockPeriod").value=b.length===2?b[1]:"";
+document.getElementById("teacherModalBg").classList.add("show");
 }
-function loadFile(e){
- const f=e.target.files[0]; if(!f)return;
- const r=new FileReader();r.onload=()=>{try{let obj=JSON.parse(r.result); if(obj.data){validateData(obj.data);state=obj}else{validateData(obj);state.data=obj;state.schedule={};state.substitutions=[]}syncEditor();refreshSelectors();alert("File loaded.");}catch(err){alert("Could not load: "+err.message)}};r.readAsText(f);
+function closeTeacherModal(){document.getElementById("teacherModalBg").classList.remove("show")}
+function saveTeacher(){
+let name=document.getElementById("tName").value.trim(),maxDaily=Number(document.getElementById("tMaxDaily").value),d=document.getElementById("tBlockDay").value,p=document.getElementById("tBlockPeriod").value;
+if(!name)return alert("Please enter teacher name.");if(editingTeacher===null&&S.teachers.some(t=>t.name.toLowerCase()===name.toLowerCase()))return alert("This teacher already exists.");
+let t={name,maxDaily:maxDaily||99,blocked:d&&p?`${d}-P${p}`:""};if(editingTeacher===null)S.teachers.push(t);else{let old=S.teachers[editingTeacher].name;if(old!==name)S.allocations.forEach(a=>{if(a.teacher===old)a.teacher=name});S.teachers[editingTeacher]=t}
+closeTeacherModal();saveLocal();refreshAll();
 }
-function clearSchedule(){state.schedule={};state.substitutions=[];refreshSelectors();setStatus(document.getElementById("genStatus"),"Timetable cleared.","warn")}
-
-function slotsForClass(c){let out=[];state.data.days.forEach(day=>{for(let p=1;p<=c.periodsPerDay;p++)out.push({day,p,key:key(day,p)})});return out}
-function teacherBlocked(t,slot){return (t.blocked||[]).includes(slot.key)}
-function initSchedule(){
- let s={};state.data.classes.forEach(c=>s[c.name]={});return s;
+function deleteTeacher(i){let t=S.teachers[i];if(S.allocations.some(a=>a.teacher===t.name))return alert("This teacher is still assigned to subjects. Remove or change those subject allocations first.");if(confirm(`Remove ${t.name}?`)){S.teachers.splice(i,1);saveLocal();refreshAll()}}
+function addClass(){let name=document.getElementById("newClassName").value.trim(),periods=Number(document.getElementById("newClassPeriods").value);if(!name)return alert("Enter class name.");if(S.classes.some(c=>c.name===name))return alert("Class already exists.");S.classes.push({name,periodsPerDay:periods||5});document.getElementById("newClassName").value="";saveLocal();refreshAll()}
+function renderClasses(){let el=document.getElementById("classTable");if(!S.classes.length){el.innerHTML='<div class="empty">No classes added yet.</div>';return}el.innerHTML=`<div class="table-wrap"><table><tr><th>#</th><th>Class</th><th>Periods / Day</th><th>Action</th></tr>${S.classes.map((c,i)=>`<tr><td>${i+1}</td><td><b>${c.name}</b></td><td>${c.periodsPerDay}</td><td><button class="btn danger small" onclick="deleteClass(${i})">Remove</button></td></tr>`).join("")}</table></div>`}
+function deleteClass(i){let c=S.classes[i];if(S.allocations.some(a=>a.className===c.name))return alert("This class still has subject allocations. Remove them first.");if(confirm(`Remove Class ${c.name}?`)){S.classes.splice(i,1);saveLocal();refreshAll()}}
+function fill(sel,items,placeholder="Select"){let el=document.getElementById(sel);if(!el)return;let old=el.value;el.innerHTML=items.length?items.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join(""):`<option value="">${placeholder}</option>`;if(items.includes(old))el.value=old}
+function esc(x){return String(x).replace(/"/g,"&quot;")}
+function fillSelectors(){
+let cn=S.classes.map(c=>c.name),tn=S.teachers.map(t=>t.name);fill("aClass",cn);fill("aTeacher",tn);fill("viewClass",cn);fill("viewTeacher",tn);fill("absentTeacher",tn);fill("subDay",S.days);
+let max=Math.max(8,...S.classes.map(c=>c.periodsPerDay));fill("subPeriod",Array.from({length:max},(_,i)=>String(i+1)));
+let bd=document.getElementById("tBlockDay");if(bd){let old=bd.value;bd.innerHTML='<option value="">None</option>'+S.days.map(d=>`<option>${d}</option>`).join("");if(S.days.includes(old))bd.value=old}
 }
-function addLesson(s,cname,slot,lesson){s[cname][slot.key]=lesson}
-function teacherBusy(s,teacher,slot){return state.data.classes.some(c=>{let x=s[c.name]?.[slot.key];return x&&x.teacher===teacher})}
-function resourceBusy(s,resource,slot){if(!resource)return false;return state.data.classes.some(c=>{let x=s[c.name]?.[slot.key];return x&&x.resource===resource})}
-function classDailySubjectCount(s,cname,day,subject){return Object.entries(s[cname]).filter(([k,v])=>k.startsWith(day+"-")&&v.subject===subject).length}
-function teacherDailyLoad(s,teacher,day){let n=0;state.data.classes.forEach(c=>Object.entries(s[c.name]).forEach(([k,v])=>{if(k.startsWith(day+"-")&&v.teacher===teacher)n++}));return n}
-function subjectAdjacentPenalty(s,cname,slot,subject){
- let pen=0;[slot.p-1,slot.p+1].forEach(p=>{let x=s[cname][key(slot.day,p)];if(x&&x.subject===subject)pen+=20});return pen
-}
+function addAllocation(){let className=document.getElementById("aClass").value,subject=document.getElementById("aSubject").value.trim(),teacher=document.getElementById("aTeacher").value,periods=Number(document.getElementById("aPeriods").value),resource=document.getElementById("aResource").value.trim();if(!className||!teacher||!subject||periods<1)return alert("Please complete all required fields.");S.allocations.push({className,subject,teacher,periodsPerWeek:periods,resource});document.getElementById("aSubject").value="";document.getElementById("aResource").value="";saveLocal();refreshAll()}
+function renderAllocations(){let el=document.getElementById("allocationTable");if(!S.allocations.length){el.innerHTML='<div class="empty">No subject allocations yet.</div>';return}el.innerHTML=`<div class="table-wrap"><table><tr><th>Class</th><th>Subject</th><th>Teacher</th><th>Periods / Week</th><th>Resource</th><th>Action</th></tr>${S.allocations.map((a,i)=>`<tr><td><span class="badge">${a.className}</span></td><td><b>${a.subject}</b></td><td>${a.teacher}</td><td>${a.periodsPerWeek}</td><td>${a.resource||"—"}</td><td><button class="btn danger small" onclick="S.allocations.splice(${i},1);saveLocal();refreshAll()">Remove</button></td></tr>`).join("")}</table></div>`}
+function updateDays(){let n=Number(document.getElementById("dayCount").value);S.days=n===6?["Mon","Tue","Wed","Thu","Fri","Sat"]:["Mon","Tue","Wed","Thu","Fri"];fillSelectors()}
+function k(d,p){return d+"-P"+p}
+function teacherByName(n){return S.teachers.find(t=>t.name===n)}
+function slots(c){let a=[];S.days.forEach(d=>{for(let p=1;p<=c.periodsPerDay;p++)a.push({day:d,p,key:k(d,p)})});return a}
+function busyTeacher(s,teacher,slot){return S.classes.some(c=>s[c.name]?.[slot.key]?.teacher===teacher)}
+function busyResource(s,res,slot){return res&&S.classes.some(c=>s[c.name]?.[slot.key]?.resource===res)}
+function dailyLoad(s,teacher,day){let n=0;S.classes.forEach(c=>Object.entries(s[c.name]||{}).forEach(([z,v])=>{if(z.startsWith(day+"-")&&v.teacher===teacher)n++}));return n}
+function sameSubjectDay(s,cname,day,subj){return Object.entries(s[cname]||{}).filter(([z,v])=>z.startsWith(day+"-")&&v.subject===subj).length}
 function generate(){
- if(!state.data){try{loadDataFromEditor()}catch(e){return}}
- const attempts=Math.max(1,Number(document.getElementById("attempts").value||800));
- const spread=document.getElementById("spread").value==="yes";
- const keep=document.getElementById("keepExisting").value==="yes";
- const teacherMap=new Map(state.data.teachers.map(t=>[t.name,t]));
- let requirements=[];
- state.data.allocations.forEach((a,idx)=>{for(let i=0;i<a.periodsPerWeek;i++)requirements.push({...a,reqId:idx+"-"+i})});
- requirements.sort((a,b)=>{
-   const ta=teacherMap.get(a.teacher),tb=teacherMap.get(b.teacher);
-   const ra=a.resource?0:1, rb=b.resource?0:1;
-   return ra-rb || (tb.blocked?.length||0)-(ta.blocked?.length||0) || b.periodsPerWeek-a.periodsPerWeek;
- });
- let best=null,bestUn=1e9,bestScore=1e18;
- for(let attempt=0;attempt<attempts;attempt++){
-   let s=keep&&Object.keys(state.schedule||{}).length?structuredClone(state.schedule):initSchedule();
-   let un=[];
-   let shuffled=[...requirements].sort((a,b)=>Math.random()-.5);
-   shuffled.sort((a,b)=>{
-      let ca=state.data.classes.find(c=>c.name===a.className), cb=state.data.classes.find(c=>c.name===b.className);
-      let sa=slotsForClass(ca).filter(sl=>!teacherBlocked(teacherMap.get(a.teacher),sl)).length;
-      let sb=slotsForClass(cb).filter(sl=>!teacherBlocked(teacherMap.get(b.teacher),sl)).length;
-      return sa-sb;
-   });
-   for(let a of shuffled){
-     let c=state.data.classes.find(x=>x.name===a.className), t=teacherMap.get(a.teacher);
-     let candidates=slotsForClass(c).filter(sl=>{
-       if(s[a.className][sl.key])return false;
-       if(teacherBlocked(t,sl)||teacherBusy(s,a.teacher,sl)||resourceBusy(s,a.resource,sl))return false;
-       if(teacherDailyLoad(s,a.teacher,sl.day)>= (t.maxDaily||99))return false;
-       return true;
-     });
-     if(!candidates.length){un.push(a);continue}
-     let scored=candidates.map(sl=>{
-       let score=Math.random()*3 + teacherDailyLoad(s,a.teacher,sl.day)*1.5 + subjectAdjacentPenalty(s,a.className,sl,a.subject);
-       if(spread)score+=classDailySubjectCount(s,a.className,sl.day,a.subject)*7;
-       return {sl,score};
-     }).sort((x,y)=>x.score-y.score);
-     addLesson(s,a.className,scored[0].sl,{subject:a.subject,teacher:a.teacher,resource:a.resource||""});
-   }
-   let score=un.length*10000;
-   state.data.classes.forEach(c=>state.data.days.forEach(day=>{
-     let vals=Object.entries(s[c.name]).filter(([k])=>k.startsWith(day+"-")).map(([,v])=>v.subject);
-     let repeats={};vals.forEach(x=>repeats[x]=(repeats[x]||0)+1);Object.values(repeats).forEach(n=>{if(n>1)score+=(n-1)*5})
-   }));
-   if(un.length<bestUn||(un.length===bestUn&&score<bestScore)){best=s;bestUn=un.length;bestScore=score;if(bestUn===0)break}
- }
- state.schedule=best||initSchedule();refreshSelectors();runClashCheck();
- if(bestUn===0)setStatus(document.getElementById("genStatus"),"Success. A complete timetable was generated with no unplaced lessons.","ok");
- else setStatus(document.getElementById("genStatus"),`A partial timetable was generated. ${bestUn} lesson occurrence(s) could not be placed. Add more free periods, adjust teacher availability, or reduce conflicting constraints.`,"warn");
+if(!S.teachers.length||!S.classes.length||!S.allocations.length)return flash("Please add teachers, classes and subject allocations first.","warn");
+let attempts=Number(document.getElementById("attempts").value)||1000,spread=document.getElementById("spread").value==="yes";
+let req=[];S.allocations.forEach(a=>{for(let i=0;i<a.periodsPerWeek;i++)req.push({...a,id:Math.random()})});
+let best=null,bestUn=1e9,bestScore=1e18;
+for(let attempt=0;attempt<attempts;attempt++){
+let s={};S.classes.forEach(c=>s[c.name]={});let shuffled=[...req].sort(()=>Math.random()-.5);let un=[];
+shuffled.sort((a,b)=>(b.resource?1:0)-(a.resource?1:0)||b.periodsPerWeek-a.periodsPerWeek);
+for(let a of shuffled){
+let c=S.classes.find(x=>x.name===a.className),t=teacherByName(a.teacher);let cand=slots(c).filter(sl=>{
+if(s[a.className][sl.key])return false;if(t.blocked===sl.key)return false;if(busyTeacher(s,a.teacher,sl)||busyResource(s,a.resource,sl))return false;if(dailyLoad(s,a.teacher,sl.day)>=t.maxDaily)return false;return true});
+if(!cand.length){un.push(a);continue}
+cand.sort((x,y)=>{
+let sx=Math.random()*2+(spread?sameSubjectDay(s,a.className,x.day,a.subject)*8:0)+dailyLoad(s,a.teacher,x.day);
+let sy=Math.random()*2+(spread?sameSubjectDay(s,a.className,y.day,a.subject)*8:0)+dailyLoad(s,a.teacher,y.day);return sx-sy});
+let sl=cand[0];s[a.className][sl.key]={subject:a.subject,teacher:a.teacher,resource:a.resource||""};
 }
-
-function refreshSelectors(){
- if(!state.data)return;
- const cs=document.getElementById("classSelect"),ts=document.getElementById("teacherSelect"),at=document.getElementById("absentTeacher"),sd=document.getElementById("subDay"),sp=document.getElementById("subPeriod");
- let fill=(el,items)=>{let old=el.value;el.innerHTML=items.map(x=>`<option>${x}</option>`).join("");if(items.includes(old))el.value=old}
- fill(cs,state.data.classes.map(x=>x.name));fill(ts,state.data.teachers.map(x=>x.name));fill(at,state.data.teachers.map(x=>x.name));fill(sd,state.data.days);
- let max=Math.max(...state.data.classes.map(x=>x.periodsPerDay));fill(sp,Array.from({length:max},(_,i)=>String(i+1)));
- renderClassTimetable();renderTeacherTimetable();refreshAbsenceLessons();
+let score=un.length*10000;if(un.length<bestUn||(un.length===bestUn&&score<bestScore)){best=s;bestUn=un.length;bestScore=score;if(bestUn===0)break}
 }
-function renderClassTimetable(){
- if(!state.data)return;let cname=document.getElementById("classSelect").value;if(!cname)return;
- let c=state.data.classes.find(x=>x.name===cname),s=state.schedule[cname]||{};
- let h=`<h3>Class ${cname}</h3><table class="timetable"><tr><th>Day</th>`;
- for(let p=1;p<=c.periodsPerDay;p++)h+=`<th>P${p}</th>`;h+="</tr>";
- state.data.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=c.periodsPerDay;p++){let x=s[key(d,p)];h+=`<td>${x?`<div class="slot-subj">${x.subject}</div><div class="slot-teacher">${x.teacher}</div>${x.resource?`<div class="small">${x.resource}</div>`:""}`:"<span class='small'>Free / Unfilled</span>"}</td>`}h+="</tr>"});h+="</table>";
- document.getElementById("classTimetable").innerHTML=h;
+S.schedule=best||{};saveLocal();refreshAll();checkClashes();
+flash(bestUn===0?"Timetable generated successfully with all lessons placed.":`Timetable generated, but ${bestUn} lesson(s) could not be placed. Review teacher availability or number of available periods.` ,bestUn===0?"ok":"warn");
 }
-function renderTeacherTimetable(){
- if(!state.data)return;let teacher=document.getElementById("teacherSelect").value;if(!teacher)return;
- let max=Math.max(...state.data.classes.map(x=>x.periodsPerDay));
- let h=`<h3>${teacher}</h3><table class="timetable"><tr><th>Day</th>`;for(let p=1;p<=max;p++)h+=`<th>P${p}</th>`;h+="</tr>";
- state.data.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=max;p++){let found=null;state.data.classes.forEach(c=>{let x=state.schedule[c.name]?.[key(d,p)];if(x&&x.teacher===teacher)found={...x,className:c.name}});h+=`<td>${found?`<div class="slot-subj">${found.className} - ${found.subject}</div>`:"<span class='small'>Free</span>"}</td>`}h+="</tr>"});h+="</table>";
- document.getElementById("teacherTimetable").innerHTML=h;
+function clearSchedule(){if(confirm("Clear the current timetable?")){S.schedule={};S.substitutions=[];saveLocal();refreshAll();document.getElementById("clashBox").textContent="Timetable cleared."}}
+function checkClashes(){
+let teacher={},resource={},issues=[];
+S.classes.forEach(c=>Object.entries(S.schedule[c.name]||{}).forEach(([slot,x])=>{(teacher[slot]??=[]).push({className:c.name,...x});if(x.resource)(resource[slot]??=[]).push({className:c.name,...x})}));
+Object.entries(teacher).forEach(([slot,a])=>{let m={};a.forEach(x=>(m[x.teacher]??=[]).push(x));Object.entries(m).forEach(([t,z])=>{if(z.length>1)issues.push(`Teacher clash: ${t} at ${slot}`)})});
+Object.entries(resource).forEach(([slot,a])=>{let m={};a.forEach(x=>(m[x.resource]??=[]).push(x));Object.entries(m).forEach(([r,z])=>{if(z.length>1)issues.push(`Resource clash: ${r} at ${slot}`)})});
+let box=document.getElementById("clashBox");box.innerHTML=issues.length?`<div class="notice bad"><b>${issues.length} clash(es) found:</b><br>${issues.join("<br>")}</div>`:`<div class="notice ok">No teacher or shared-resource clashes found.</div>`;return issues;
 }
-function runClashCheck(){
- if(!state.data)return;
- let clashes=[],teacherSlots={},resourceSlots={};
- state.data.classes.forEach(c=>Object.entries(state.schedule[c.name]||{}).forEach(([slot,x])=>{
-   if(!teacherSlots[slot])teacherSlots[slot]=[];teacherSlots[slot].push({className:c.name,...x});
-   if(x.resource){if(!resourceSlots[slot])resourceSlots[slot]=[];resourceSlots[slot].push({className:c.name,...x})}
- }));
- Object.entries(teacherSlots).forEach(([slot,arr])=>{
-   let by={};arr.forEach(x=>(by[x.teacher]??=[]).push(x));Object.entries(by).forEach(([t,list])=>{if(list.length>1)clashes.push(`Teacher clash: ${t} is assigned to ${list.map(x=>`Class ${x.className} (${x.subject})`).join(" and ")} at ${slot}.`)})
- });
- Object.entries(resourceSlots).forEach(([slot,arr])=>{
-   let by={};arr.forEach(x=>(by[x.resource]??=[]).push(x));Object.entries(by).forEach(([r,list])=>{if(list.length>1)clashes.push(`Resource clash: ${r} is used by ${list.map(x=>`Class ${x.className}`).join(" and ")} at ${slot}.`)})
- });
- let el=document.getElementById("clashResults");
- if(!Object.keys(state.schedule).length)el.innerHTML="<div class='status warn'>No timetable has been generated yet.</div>";
- else if(!clashes.length)el.innerHTML="<div class='status ok'>No teacher or shared-resource clashes found.</div>";
- else el.innerHTML=`<div class='status bad'><b>${clashes.length} clash(es) found:</b><ul>${clashes.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
- return clashes;
+function renderClassView(){
+let cname=document.getElementById("viewClass")?.value;if(!cname||!S.classes.length)return;let c=S.classes.find(x=>x.name===cname),s=S.schedule[cname]||{};
+let h=`<h3>Class ${cname}</h3><div class="table-wrap"><table class="timetable"><tr><th>Day</th>`;for(let p=1;p<=c.periodsPerDay;p++)h+=`<th>P${p}</th>`;h+="</tr>";
+S.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=c.periodsPerDay;p++){let x=s[k(d,p)];h+=`<td>${x?`<div class="lesson">${x.subject}</div><div class="teacher">${x.teacher}</div>`:`<span class="muted">Free</span>`}</td>`}h+="</tr>"});h+="</table></div>";document.getElementById("timetableView").innerHTML=h;
 }
-function lessonsForTeacher(teacher,slotKey){
- let arr=[];state.data.classes.forEach(c=>{let x=state.schedule[c.name]?.[slotKey];if(x&&x.teacher===teacher)arr.push({className:c.name,...x})});return arr
+function renderTeacherView(){
+let t=document.getElementById("viewTeacher")?.value;if(!t)return;let max=Math.max(...S.classes.map(c=>c.periodsPerDay),1),h=`<h3>${t}</h3><div class="table-wrap"><table class="timetable"><tr><th>Day</th>`;for(let p=1;p<=max;p++)h+=`<th>P${p}</th>`;h+="</tr>";
+S.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=max;p++){let found=null;S.classes.forEach(c=>{let x=S.schedule[c.name]?.[k(d,p)];if(x?.teacher===t)found={...x,className:c.name}});h+=`<td>${found?`<div class="lesson">${found.className} · ${found.subject}</div>`:`<span class="muted">Free</span>`}</td>`}h+="</tr>"});h+="</table></div>";document.getElementById("timetableView").innerHTML=h;
 }
-function refreshAbsenceLessons(){
- if(!state.data)return;
- let teacher=document.getElementById("absentTeacher").value,day=document.getElementById("subDay").value,p=Number(document.getElementById("subPeriod").value),slotKey=key(day,p);
- let lessons=lessonsForTeacher(teacher,slotKey), el=document.getElementById("absenceLessons");
- if(!lessons.length){el.innerHTML="<div class='status warn'>This teacher has no scheduled lesson in this selected period.</div>";document.getElementById("subSuggestions").innerHTML="";return}
- el.innerHTML=lessons.map((x,i)=>`<div class="card"><b>Class ${x.className}: ${x.subject}</b><br><span class="small">${day} P${p}</span><div class="actions"><button class="btn" onclick="suggestSub(${i})">Find Substitute</button></div></div>`).join("");
+function lessonsAt(teacher,day,p){let out=[];S.classes.forEach(c=>{let x=S.schedule[c.name]?.[k(day,p)];if(x?.teacher===teacher)out.push({className:c.name,...x})});return out}
+function showAbsentLessons(){
+let teacher=document.getElementById("absentTeacher").value,day=document.getElementById("subDay").value,p=Number(document.getElementById("subPeriod").value),ls=lessonsAt(teacher,day,p),el=document.getElementById("absentLessons");
+if(!ls.length){el.innerHTML='<div class="notice warn">This teacher has no lesson during the selected period.</div>';return}
+el.innerHTML=ls.map((x,i)=>`<div class="notice ok"><b>Class ${x.className} · ${x.subject}</b><div class="actions"><button class="btn" onclick="findSub(${i})">Find Best Substitute</button></div></div>`).join("");
+window.currentAbsent={teacher,day,p,ls};
 }
-function taughtSubjects(teacher){
- return new Set(state.data.allocations.filter(a=>a.teacher===teacher).map(a=>a.subject));
+function findSub(i){
+let x=window.currentAbsent.ls[i],abs=window.currentAbsent,slot=k(abs.day,abs.p);
+let candidates=S.teachers.filter(t=>t.name!==abs.teacher&&!t.blocked===slot).filter(t=>!busyTeacher(S.schedule,t.name,{key:slot})).map(t=>{
+let match=S.allocations.some(a=>a.teacher===t.name&&a.subject===x.subject),load=S.allocations.filter(a=>a.teacher===t.name).reduce((n,a)=>n+a.periodsPerWeek,0);return {...t,match,load,score:(match?100:0)-load*.4}
+}).sort((a,b)=>b.score-a.score);
+let box=document.getElementById("absentLessons");box.innerHTML=`<div class="table-wrap"><table><tr><th>Rank</th><th>Teacher</th><th>Subject Match</th><th>Weekly Load</th><th>Action</th></tr>${candidates.map((t,j)=>`<tr><td>${j+1}</td><td><b>${t.name}</b></td><td>${t.match?"Yes":"No"}</td><td>${t.load}</td><td><button class="btn small" onclick="assignSub('${t.name.replace(/'/g,"\\'")}',${i})">Assign</button></td></tr>`).join("")}</table></div>`;
 }
-function weeklyLoad(teacher){
- return state.data.allocations.filter(a=>a.teacher===teacher).reduce((n,a)=>n+Number(a.periodsPerWeek||0),0)
-}
-let currentSubLesson=null;
-function suggestSub(i){
- let absent=document.getElementById("absentTeacher").value,day=document.getElementById("subDay").value,p=Number(document.getElementById("subPeriod").value),slotKey=key(day,p);
- let lesson=lessonsForTeacher(absent,slotKey)[i];currentSubLesson={...lesson,absent,day,p,slotKey};
- let candidates=state.data.teachers.filter(t=>t.name!==absent).filter(t=>{
-   let sl={day,p,key:slotKey};return !teacherBlocked(t,sl)&&!teacherBusy(state.schedule,t.name,sl)
- }).map(t=>{
-   let subj=taughtSubjects(t.name),score=(subj.has(lesson.subject)?100:0)-weeklyLoad(t.name)*0.5;
-   return {name:t.name,score,subjectMatch:subj.has(lesson.subject),load:weeklyLoad(t.name)}
- }).sort((a,b)=>b.score-a.score);
- let el=document.getElementById("subSuggestions");
- if(!candidates.length){el.innerHTML="<div class='status bad'>No teacher is free in this period.</div>";return}
- el.innerHTML=`<table><tr><th>Rank</th><th>Teacher</th><th>Subject Match</th><th>Weekly Load</th><th>Action</th></tr>${candidates.map((c,i)=>`<tr><td>${i+1}</td><td>${c.name}</td><td>${c.subjectMatch?"Yes":"No"}</td><td>${c.load}</td><td><button class="btn" onclick="assignSub('${c.name.replace(/'/g,"\\'")}')">Assign</button></td></tr>`).join("")}</table>`;
-}
-function assignSub(name){
- if(!currentSubLesson)return;
- state.substitutions.push({...currentSubLesson,substitute:name,created:new Date().toLocaleString()});
- renderSubRecords();alert("Substitution assigned to "+name);
-}
-function renderSubRecords(){
- let el=document.getElementById("subRecords");
- if(!state.substitutions.length){el.innerHTML="<p class='hint'>No substitutions recorded yet.</p>";return}
- el.innerHTML=`<table><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Substitute</th></tr>${state.substitutions.map(x=>`<tr><td>${x.day}</td><td>P${x.p}</td><td>${x.className}</td><td>${x.subject}</td><td>${x.absent}</td><td>${x.substitute}</td></tr>`).join("")}</table>`;
-}
-function printCurrent(){window.print()}
-document.addEventListener("DOMContentLoaded",()=>{state.data=structuredClone(sampleData);syncEditor();refreshSelectors();renderSubRecords();});
+function assignSub(name,i){let x=window.currentAbsent.ls[i],a=window.currentAbsent;S.substitutions.push({day:a.day,period:a.p,className:x.className,subject:x.subject,absent:a.teacher,substitute:name});saveLocal();renderSubTable();alert(`Assigned ${name} as substitute.`)}
+function renderSubTable(){let el=document.getElementById("subTable");if(!S.substitutions.length){el.innerHTML='<div class="empty">No substitutions recorded.</div>';return}el.innerHTML=`<div class="table-wrap"><table><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent</th><th>Substitute</th></tr>${S.substitutions.map(x=>`<tr><td>${x.day}</td><td>P${x.period}</td><td>${x.className}</td><td>${x.subject}</td><td>${x.absent}</td><td><b>${x.substitute}</b></td></tr>`).join("")}</table></div>`}
+function exportBackup(){let b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="school-timetable-backup.json";a.click()}
+function restoreBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{S=JSON.parse(r.result);saveLocal();refreshAll();alert("Backup restored successfully.")}catch(err){alert("Invalid backup file.")}};r.readAsText(f)}
+function resetAll(){if(confirm("This will remove all teachers, classes, allocations and timetable data from this browser. Continue?")){S={days:["Mon","Tue","Wed","Thu","Fri"],teachers:[],classes:[],allocations:[],schedule:{},substitutions:[]};saveLocal();refreshAll()}}
+loadLocal();refreshAll();
 </script>
 </body>
 </html>
