@@ -120,7 +120,7 @@ input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
 
 <section id="teachers" class="page">
 <div class="eyebrow">Teachers</div>
-<div class="page-heading"><div><h2>Teachers</h2><p>Add, edit or remove teachers.</p></div><button class="primary-btn" onclick="showTeacherModal()">＋ Add Teacher</button></div>
+<div class="page-heading"><div><h2>Teachers</h2><p>Add, edit or remove teachers.</p></div><div style="display:flex;gap:10px"><button class="secondary-btn" onclick="recalcMaxDaily()">↻ Recalculate Max Periods/Day</button><button class="primary-btn" onclick="showTeacherModal()">＋ Add Teacher</button></div></div>
 <div class="card">
 <div class="toolbar"><div class="search"><span>⌕</span><input id="teacherSearch" oninput="teacherCurrentPage=1;renderTeachers()" placeholder="Search teachers..."></div><select id="teacherFilter" onchange="renderTeachers()" style="max-width:180px"><option value="">All Teachers</option><option value="active">Active</option></select></div>
 <div id="teacherTable"></div><div class="pagination"><span id="teacherCount">Showing 0 teachers</span><span><button class="icon-btn" style="width:auto;padding:6px 12px" aria-label="Previous page" onclick="teacherPage(-1)">‹</button> &nbsp;<b id="teacherPageLabel">1</b>&nbsp; <button class="icon-btn" style="width:auto;padding:6px 12px" aria-label="Next page" onclick="teacherPage(1)">›</button></span></div>
@@ -299,6 +299,32 @@ function renderTeachers(){
   el.innerHTML=`<div class="table-wrap"><table><tr><th>#</th><th>Teacher Name</th><th>Main Subject</th><th>Max Periods/Day</th><th>Status</th><th>Actions</th></tr>${arr.map((t,n)=>`<tr><td>${start+n+1}</td><td><b>${esc(t.name)}</b></td><td>${esc(t.subject)||'—'}</td><td>${t.maxDaily}</td><td><span class="badge active">Active</span></td><td><button class="icon-btn edit" aria-label="Edit ${esc(t.name)}" onclick="showTeacherModal(${t.i})">✎</button><button class="icon-btn delete" aria-label="Delete ${esc(t.name)}" onclick="deleteTeacher(${t.i})">🗑</button></td></tr>`).join('')}</table></div>`;
   countEl.textContent=`Showing ${start+1}-${start+arr.length} of ${filtered.length} teachers`;
   pageLabel.textContent=`${teacherCurrentPage} / ${totalPages}`;
+}
+// Recomputes maxDaily for every existing teacher from what's actually in the
+// current schedule (the most periods they have on any single day), so records
+// left over from an older import (which used a blanket 99) get fixed without
+// needing to re-import the Excel file.
+function recalcMaxDaily(){
+  if(!S.teachers.length) return alert('No teachers to recalculate.');
+  let counts={};
+  S.classes.forEach(c=>{
+    Object.entries(S.schedule[c.name]||{}).forEach(([key,x])=>{
+      if(!x.teacher) return;
+      const day=key.split('-')[0];
+      counts[x.teacher]=counts[x.teacher]||{};
+      counts[x.teacher][day]=(counts[x.teacher][day]||0)+1;
+    });
+  });
+  let updated=0, noSchedule=0;
+  S.teachers.forEach(t=>{
+    const dayCounts=counts[t.name];
+    if(!dayCounts){noSchedule++;return}
+    const max=Math.max(...Object.values(dayCounts));
+    if(max>0 && t.maxDaily!==max){t.maxDaily=max;updated++}
+  });
+  save();
+  refreshAll();
+  alert(`Updated ${updated} teacher(s) from their actual scheduled periods.`+(noSchedule?` ${noSchedule} teacher(s) have no lessons in the current schedule and were left unchanged.`:''));
 }
 function deleteTeacher(i){let t=S.teachers[i];if(S.classes.some(c=>c.classTeacher===t.name))return alert('This teacher is assigned as a class teacher. Change the class teacher assignment first.');if(S.allocations.some(a=>a.teacher===t.name))return alert('Remove or change this teacher’s subject allocations first.');if(confirm(`Remove ${t.name}?`)){S.teachers.splice(i,1);save();refreshAll()}}
 
