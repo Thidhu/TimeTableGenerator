@@ -643,12 +643,29 @@ async function importExcelTimetable(event){
         }
       }
     }
-    imported.teachers=imported.teachers.map(name=>({
-      name,
-      subject:(teacherSubjects[name]||[]).slice(0,3).join(', '),
-      maxDaily:99,
-      blocked:''
-    }));
+    // Work out each teacher's real maximum periods/day from what was actually
+    // scheduled for them (the highest number of periods they have on any single
+    // day), instead of defaulting everyone to a placeholder of 99.
+    let teacherDayCounts={};
+    for(const c of imported.classes){
+      Object.entries(imported.schedule[c.name]||{}).forEach(([key,x])=>{
+        if(!x.teacher) return;
+        const day=key.split('-')[0];
+        teacherDayCounts[x.teacher]=teacherDayCounts[x.teacher]||{};
+        teacherDayCounts[x.teacher][day]=(teacherDayCounts[x.teacher][day]||0)+1;
+      });
+    }
+    imported.teachers=imported.teachers.map(name=>{
+      const dayCounts=teacherDayCounts[name]||{};
+      const counts=Object.values(dayCounts);
+      const actualMax=counts.length?Math.max(...counts):0;
+      return {
+        name,
+        subject:(teacherSubjects[name]||[]).slice(0,3).join(', '),
+        maxDaily:actualMax||99,
+        blocked:''
+      };
+    });
     // Create allocations from imported lesson counts
     let allocationMap={};
     for(const c of imported.classes){
