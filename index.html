@@ -102,6 +102,7 @@ input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
  <button class="nav-item" aria-label="Class Teachers" onclick="openPage('classTeachers',this)"><span class="nav-icon" title="Class Teachers">👨‍🏫</span><span class="nav-label">Class Teachers</span><span class="nav-arrow">›</span><span class="tooltip"><b>Class Teachers</b>Assign or change the class teacher for every class.</span></button>
  <button class="nav-item" aria-label="Subjects" onclick="openPage('subjects',this)"><span class="nav-icon" title="Subjects">📚</span><span class="nav-label">Subjects</span><span class="nav-arrow">›</span><span class="tooltip"><b>Subjects</b>Manage school subjects and shared facilities.</span></button>
  <button class="nav-item" aria-label="Subject Allocation" onclick="openPage('allocations',this)"><span class="nav-icon" title="Subject Allocation">🔗</span><span class="nav-label">Subject Allocation</span><span class="nav-arrow">›</span><span class="tooltip"><b>Subject Allocation</b>Assign subjects and weekly periods to teachers.</span></button>
+ <button class="nav-item" aria-label="Fixed Periods" onclick="openPage('fixedPeriods',this)"><span class="nav-icon" title="Fixed Periods">📌</span><span class="nav-label">Fixed Periods</span><span class="nav-arrow">›</span><span class="tooltip"><b>Fixed Periods</b>Lock a period to the class teacher or a chosen subject, every day or on set days.</span></button>
  <button class="nav-item" aria-label="Generate Timetable" onclick="openPage('generate',this)"><span class="nav-icon" title="Generate Timetable">⚡</span><span class="nav-label">Generate Timetable</span><span class="nav-arrow">›</span><span class="tooltip"><b>Generate Timetable</b>Create a clash-free timetable automatically.</span></button>
  <button class="nav-item" aria-label="Substitution" onclick="openPage('substitution',this)"><span class="nav-icon" title="Substitution">🔄</span><span class="nav-label">Substitution</span><span class="nav-arrow">›</span><span class="tooltip"><b>Substitution</b>Find available teachers when someone is absent.</span></button>
  <button class="nav-item" aria-label="Reports" onclick="openPage('reports',this)"><span class="nav-icon" title="Reports">📊</span><span class="nav-label">Reports</span><span class="nav-arrow">›</span><span class="tooltip"><b>Reports</b>View class, teacher and timetable reports.</span></button>
@@ -192,6 +193,27 @@ input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
 </div>
 </section>
 
+<section id="fixedPeriods" class="page">
+<div class="eyebrow">Academic Setup</div>
+<div class="page-heading"><div><h2>Fixed Periods</h2><p>Lock a period to the class teacher or a specific subject — every day, or on chosen days — so the generator never reassigns it.</p></div></div>
+<div class="card">
+<div class="form-grid">
+<div class="form-group"><label for="fpClass">Class</label><select id="fpClass"></select></div>
+<div class="form-group"><label for="fpDay">Day</label><select id="fpDay"></select></div>
+<div class="form-group"><label for="fpPeriod">Period</label><input id="fpPeriod" type="number" min="1" value="1"></div>
+<div class="form-group"><label for="fpMode">Assign To</label><select id="fpMode" onchange="toggleFixedTeacherField()"><option value="classTeacher">Class Teacher</option><option value="specific">Specific Teacher</option></select></div>
+<div class="form-group" id="fpTeacherWrap" style="display:none"><label for="fpTeacher">Teacher</label><select id="fpTeacher"></select></div>
+<div class="form-group"><label for="fpSubject">Subject / Label</label><input id="fpSubject" placeholder="Example: Roll Call, Assembly, Games"></div>
+<div class="form-group full"><button class="primary-btn" style="width:100%;padding:12px" onclick="addFixedPeriod()">Add Fixed Period</button></div>
+</div>
+</div>
+<div class="card">
+<h3>Current Fixed Periods</h3>
+<p class="muted">Applied automatically at the start of every timetable generation.</p>
+<div id="fixedPeriodTable"></div>
+</div>
+</section>
+
 <section id="generate" class="page">
 <div class="eyebrow">Automation</div><div class="page-heading"><div><h2>Generate Timetable</h2><p>Automatically create and check a timetable.</p></div></div>
 <div class="card"><div class="grid g3"><div class="form-group"><label for="attempts">Generation Attempts</label><input id="attempts" type="number" value="1000"></div><div class="form-group"><label for="dayCount">School Days</label><select id="dayCount" onchange="updateDays()"><option value="5">5 Days</option><option value="6">6 Days</option></select></div><div class="form-group"><label for="spread">Subject Spreading</label><select id="spread"><option value="yes">Avoid repetition</option><option value="no">No preference</option></select></div></div>
@@ -228,7 +250,15 @@ input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
 <div class="footer">Kyidsa Primary School &nbsp; | &nbsp; School Timetable Manager &nbsp; <span style="float:right">v6.1</span></div>
 </div></main></div>
 
-<div id="teacherModal" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="teacherModalTitle"><div class="modal"><h3 id="teacherModalTitle">Add Teacher</h3><div class="form-grid"><div class="form-group full"><label for="tName">Teacher Name</label><input id="tName" placeholder="Enter teacher name"></div><div class="form-group"><label for="tSubject">Main Subject</label><input id="tSubject" placeholder="Example: Dzongkha"></div><div class="form-group"><label for="tMax">Maximum Periods / Day</label><input id="tMax" type="number" value="6"></div><div class="form-group"><label for="tDay">Blocked Day (Optional)</label><select id="tDay"></select></div><div class="form-group"><label for="tPeriod">Blocked Period (Optional)</label><input id="tPeriod" type="number" min="1"></div></div><div class="modal-actions"><button class="secondary-btn" onclick="closeModal('teacherModal')">Cancel</button><button class="primary-btn" style="padding:11px 18px" onclick="saveTeacher()">Save Teacher</button></div></div></div>
+<div id="teacherModal" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="teacherModalTitle"><div class="modal"><h3 id="teacherModalTitle">Add Teacher</h3><div class="form-grid"><div class="form-group full"><label for="tName">Teacher Name</label><input id="tName" placeholder="Enter teacher name"></div><div class="form-group"><label for="tSubject">Main Subject</label><input id="tSubject" placeholder="Example: Dzongkha"></div><div class="form-group"><label for="tMax">Maximum Periods / Day</label><input id="tMax" type="number" value="6"></div><div class="form-group full">
+<label>Always Unavailable (Optional)</label>
+<div style="display:flex;gap:10px">
+<select id="tBlockDay" style="flex:1"></select>
+<input id="tBlockPeriod" type="number" min="1" placeholder="Period" style="flex:1">
+<button type="button" class="secondary-btn" onclick="addBlockedSlot()">＋ Add</button>
+</div>
+<div id="blockedSlotList" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px"></div>
+</div></div><div class="modal-actions"><button class="secondary-btn" onclick="closeModal('teacherModal')">Cancel</button><button class="primary-btn" style="padding:11px 18px" onclick="saveTeacher()">Save Teacher</button></div></div></div>
 
 <div id="classModal" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="classModalTitle"><div class="modal"><h3 id="classModalTitle">Add Class</h3><div class="form-grid"><div class="form-group"><label for="cName">Class Name</label><input id="cName" placeholder="Example: IV"></div><div class="form-group"><label for="cPeriods">Periods per Day</label><input id="cPeriods" type="number" value="8"></div></div><div class="modal-actions"><button class="secondary-btn" onclick="closeModal('classModal')">Cancel</button><button class="primary-btn" style="padding:11px 18px" onclick="saveClass()">Save Class</button></div></div></div>
 
@@ -271,12 +301,32 @@ function closeModal(id){
   document.removeEventListener('keydown', modalEscHandler);
 }
 
-function showTeacherModal(i=null){editTeacherIndex=i;document.getElementById('teacherModalTitle').textContent=i===null?'Add Teacher':'Edit Teacher';let t=i===null?{name:'',subject:'',maxDaily:6,blocked:''}:S.teachers[i];document.getElementById('tName').value=t.name;document.getElementById('tSubject').value=t.subject||'';document.getElementById('tMax').value=t.maxDaily||6;let b=(t.blocked||'').split('-P');fillDays();document.getElementById('tDay').value=b.length===2?b[0]:'';document.getElementById('tPeriod').value=b.length===2?b[1]:'';openModal('teacherModal')}
+let tempBlockedSlots=[];
+function showTeacherModal(i=null){editTeacherIndex=i;document.getElementById('teacherModalTitle').textContent=i===null?'Add Teacher':'Edit Teacher';let t=i===null?{name:'',subject:'',maxDaily:6,blockedSlots:[]}:S.teachers[i];document.getElementById('tName').value=t.name;document.getElementById('tSubject').value=t.subject||'';document.getElementById('tMax').value=t.maxDaily||6;tempBlockedSlots=t.blockedSlots?t.blockedSlots.map(b=>({...b})):(t.blocked?[{day:t.blocked.split('-P')[0],period:Number(t.blocked.split('-P')[1])}]:[]);fillDayOptions('tBlockDay','All Days');renderBlockedSlots();openModal('teacherModal')}
 function showClassModal(){openModal('classModal')}
 function showSubjectModal(){openModal('subjectModal')}
-function fillDays(){let e=document.getElementById('tDay');e.innerHTML='<option value="">None</option>'+S.days.map(d=>`<option>${d}</option>`).join('')}
+function fillDayOptions(id,allLabel){let e=document.getElementById(id);if(!e)return;let old=e.value;e.innerHTML=(allLabel?`<option value="All">${allLabel}</option>`:'')+S.days.map(d=>`<option>${d}</option>`).join('');if(old&&[...e.options].some(o=>o.value===old))e.value=old}
 
-function saveTeacher(){let name=tName.value.trim();if(!name)return alert('Enter teacher name.');let t={name,subject:tSubject.value.trim(),maxDaily:Number(tMax.value)||99,blocked:tDay.value&&tPeriod.value?`${tDay.value}-P${tPeriod.value}`:''};if(editTeacherIndex===null){if(S.teachers.some(x=>x.name.toLowerCase()===name.toLowerCase()))return alert('Teacher already exists.');S.teachers.push(t)}else{let old=S.teachers[editTeacherIndex].name;S.allocations.forEach(a=>{if(a.teacher===old)a.teacher=name});S.teachers[editTeacherIndex]=t}save();closeModal('teacherModal');refreshAll()}
+function addBlockedSlot(){
+  const day=document.getElementById('tBlockDay').value;
+  const period=Number(document.getElementById('tBlockPeriod').value);
+  if(!day||!period)return alert('Select a day and a period.');
+  if(tempBlockedSlots.some(b=>b.day===day&&Number(b.period)===period))return alert('That slot is already added.');
+  tempBlockedSlots.push({day,period});
+  document.getElementById('tBlockPeriod').value='';
+  renderBlockedSlots();
+}
+function removeBlockedSlot(i){tempBlockedSlots.splice(i,1);renderBlockedSlots()}
+function renderBlockedSlots(){
+  const el=document.getElementById('blockedSlotList');
+  if(!el)return;
+  el.innerHTML=tempBlockedSlots.length?tempBlockedSlots.map((b,i)=>`<span class="badge class" style="display:inline-flex;align-items:center;gap:6px">${esc(b.day==='All'?'Every day':b.day)} · P${b.period} <button type="button" onclick="removeBlockedSlot(${i})" style="border:0;background:transparent;cursor:pointer;font-weight:800;color:#c43d45">×</button></span>`).join(''):'<span class="muted">No unavailable periods set.</span>';
+}
+function isTeacherBlocked(t,day,period){
+  return (t.blockedSlots||[]).some(b=>(b.day==='All'||b.day===day)&&Number(b.period)===Number(period));
+}
+
+function saveTeacher(){let name=tName.value.trim();if(!name)return alert('Enter teacher name.');let t={name,subject:tSubject.value.trim(),maxDaily:Number(tMax.value)||99,blockedSlots:tempBlockedSlots.map(b=>({...b}))};if(editTeacherIndex===null){if(S.teachers.some(x=>x.name.toLowerCase()===name.toLowerCase()))return alert('Teacher already exists.');S.teachers.push(t)}else{let old=S.teachers[editTeacherIndex].name;S.allocations.forEach(a=>{if(a.teacher===old)a.teacher=name});S.teachers[editTeacherIndex]=t}save();closeModal('teacherModal');refreshAll()}
 
 function teacherPage(delta){teacherCurrentPage+=delta;renderTeachers()}
 function renderTeachers(){
@@ -346,7 +396,62 @@ function renderSubjects(){
 }
 
 function options(id,items,empty='Select'){let e=document.getElementById(id);if(!e)return;let old=e.value;e.innerHTML=items.length?items.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join(''):`<option value="">${empty}</option>`;if(items.includes(old))e.value=old}
-function fillSelectors(){options('aClass',S.classes.map(c=>c.name));options('aSubject',S.subjects);options('aTeacher',S.teachers.map(t=>t.name));options('absTeacher',S.teachers.map(t=>t.name));options('subDay',S.days);options('reportClass',S.classes.map(c=>c.name));options('reportTeacher',S.teachers.map(t=>t.name));options('ctClass',S.classes.map(c=>c.name));options('ctTeacher',S.teachers.map(t=>t.name));let max=Math.max(8,...S.classes.map(c=>c.periodsPerDay));options('subPeriod',Array.from({length:max},(_,i)=>String(i+1)))}
+function fillSelectors(){options('aClass',S.classes.map(c=>c.name));options('aSubject',S.subjects);options('aTeacher',S.teachers.map(t=>t.name));options('absTeacher',S.teachers.map(t=>t.name));options('subDay',S.days);options('reportClass',S.classes.map(c=>c.name));options('reportTeacher',S.teachers.map(t=>t.name));options('ctClass',S.classes.map(c=>c.name));options('ctTeacher',S.teachers.map(t=>t.name));options('fpClass',S.classes.map(c=>c.name));options('fpTeacher',S.teachers.map(t=>t.name));fillDayOptions('fpDay','All Days');let max=Math.max(8,...S.classes.map(c=>c.periodsPerDay));options('subPeriod',Array.from({length:max},(_,i)=>String(i+1)))}
+
+function toggleFixedTeacherField(){
+  const mode=document.getElementById('fpMode').value;
+  document.getElementById('fpTeacherWrap').style.display=mode==='specific'?'block':'none';
+}
+function resolveFixedTeacher(fp){
+  if(fp.mode==='classTeacher'){
+    const c=S.classes.find(x=>x.name===fp.className);
+    return c&&c.classTeacher?c.classTeacher:'';
+  }
+  return fp.teacher||'';
+}
+function addFixedPeriod(){
+  const className=document.getElementById('fpClass').value;
+  const day=document.getElementById('fpDay').value;
+  const period=Number(document.getElementById('fpPeriod').value);
+  const mode=document.getElementById('fpMode').value;
+  const subject=document.getElementById('fpSubject').value.trim();
+  const teacher=document.getElementById('fpTeacher').value;
+  if(!className||!day||!period||!subject)return alert('Complete all fields.');
+  if(mode==='specific'&&!teacher)return alert('Select a teacher.');
+  S.fixedPeriods=S.fixedPeriods||[];
+  S.fixedPeriods.push({className,day,period,mode,subject,teacher:mode==='specific'?teacher:''});
+  document.getElementById('fpSubject').value='';
+  save();refreshAll();
+}
+function deleteFixedPeriod(i){if(confirm('Remove this fixed period?')){S.fixedPeriods.splice(i,1);save();refreshAll()}}
+function renderFixedPeriods(){
+  const el=document.getElementById('fixedPeriodTable');
+  if(!el)return;
+  const list=S.fixedPeriods||[];
+  el.innerHTML=list.length?`<div class="table-wrap"><table><tr><th>Class</th><th>Day</th><th>Period</th><th>Subject</th><th>Teacher</th><th>Action</th></tr>${list.map((fp,i)=>{const teacher=resolveFixedTeacher(fp);return `<tr><td><span class="badge class">${esc(fp.className)}</span></td><td>${fp.day==='All'?'Every day':esc(fp.day)}</td><td>P${fp.period}</td><td><b>${esc(fp.subject)}</b></td><td>${teacher?esc(teacher):'<span class="muted">Class teacher not set</span>'}</td><td><button class="icon-btn delete" aria-label="Delete fixed period" onclick="deleteFixedPeriod(${i})">🗑</button></td></tr>`}).join('')}</table></div>`:'<div class="empty">No fixed periods set. Add one above, e.g. Period 1 every day → Class Teacher.</div>';
+}
+// Builds a schedule pre-filled with all fixed periods, expanding "All" days into
+// the school's actual days, and flags any teacher double-bookings between rules.
+function buildFixedSchedule(){
+  const base={};
+  S.classes.forEach(c=>base[c.name]={});
+  const issues=[];
+  (S.fixedPeriods||[]).forEach(fp=>{
+    const c=S.classes.find(x=>x.name===fp.className);
+    if(!c){issues.push(`Fixed period skipped: class "${esc(fp.className)}" no longer exists.`);return}
+    const teacher=resolveFixedTeacher(fp);
+    if(!teacher){issues.push(`Fixed period skipped: ${esc(fp.className)} P${fp.period} has no class teacher assigned.`);return}
+    if(fp.period<1||fp.period>Number(c.periodsPerDay||0)){issues.push(`Fixed period skipped: ${esc(fp.className)} P${fp.period} is outside its periods/day.`);return}
+    const days=fp.day==='All'?S.days:[fp.day];
+    days.forEach(d=>{
+      const key=K(d,fp.period);
+      if(base[c.name][key]){issues.push(`Duplicate fixed period at ${esc(fp.className)} ${key}.`);return}
+      if(teacherBusy(base,teacher,{key})){issues.push(`${esc(teacher)} is fixed to two classes at ${key}.`);return}
+      base[c.name][key]={subject:fp.subject,teacher,resource:'',fixed:true};
+    });
+  });
+  return {base,issues};
+}
 
 function assignClassTeacher(){
   let className=document.getElementById('ctClass').value;
@@ -452,6 +557,12 @@ async function generate(){
     const spreadInput=document.getElementById('spread');
     const avoidRepeat=!spreadInput || spreadInput.value==='yes';
 
+    const {base:fixedBase,issues:fixedIssues}=buildFixedSchedule();
+    if(fixedIssues.length){
+      message(`<b>Fixed period warning(s) — these were skipped:</b><br>${fixedIssues.join('<br>')}<br><br>Continuing with the remaining fixed periods…`,'warn');
+      await new Promise(r=>setTimeout(r,0));
+    }
+
     const requests=[];
     S.allocations.forEach(a=>{
       for(let i=0;i<Number(a.periodsPerWeek);i++) requests.push({...a});
@@ -473,7 +584,7 @@ async function generate(){
     const YIELD_EVERY=25;
     for(let attempt=0;attempt<attemptCount;attempt++){
       const schedule={};
-      S.classes.forEach(c=>schedule[c.name]={});
+      S.classes.forEach(c=>schedule[c.name]={...(fixedBase[c.name]||{})});
       const unplaced=[];
       const order=[...requests].sort((a,b)=>difficulty(a)-difficulty(b));
 
@@ -483,7 +594,7 @@ async function generate(){
         if(!c||!t){unplaced.push(a);continue;}
         let candidates=classSlots(c).filter(sl=>{
           if(schedule[a.className][sl.key])return false;
-          if((t.blocked||'')===sl.key)return false;
+          if(isTeacherBlocked(t,sl.day,sl.p))return false;
           if(teacherBusy(schedule,a.teacher,sl))return false;
           if(resourceBusy(schedule,a.resource||'',sl))return false;
           if(loadDay(schedule,a.teacher,sl.day)>=Number(t.maxDaily||99))return false;
@@ -539,7 +650,7 @@ function showAbsentLesson(){
   let x=lessons[0];
   let cand=S.teachers.filter(a=>{
     if(a.name===t) return false;
-    if((a.blocked||'')===K(d,p)) return false;
+    if(isTeacherBlocked(a,d,p)) return false;
     if(teacherBusy(S.schedule,a.name,{key:K(d,p)})) return false;
     if(loadDay(S.schedule,a.name,d)>=Number(a.maxDaily||99)) return false;
     return true;
@@ -556,7 +667,7 @@ function renderClassReport(){
   let h=`<div id="printableReport"><h3>Class ${esc(n)}</h3><div style="margin-bottom:14px">${ct}</div><div class="table-wrap"><table class="timetable"><tr><th>Day</th>`;
   for(let p=1;p<=c.periodsPerDay;p++)h+=`<th>P${p}</th>`;
   h+='</tr>';
-  S.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=c.periodsPerDay;p++){let x=s[K(d,p)];h+=`<td>${x?`<div class="lesson">${esc(x.subject)}</div><div class="teacher-small">${esc(x.teacher)}</div>`:'<span class="muted">Free</span>'}</td>`}h+='</tr>'});
+  S.days.forEach(d=>{h+=`<tr><th>${d}</th>`;for(let p=1;p<=c.periodsPerDay;p++){let x=s[K(d,p)];h+=`<td>${x?`<div class="lesson">${x.fixed?'📌 ':''}${esc(x.subject)}</div><div class="teacher-small">${esc(x.teacher)}</div>`:'<span class="muted">Free</span>'}</td>`}h+='</tr>'});
   reportArea.innerHTML=h+'</table></div></div>';
   document.getElementById('printReportBtn').style.display='inline-block';
 }
@@ -726,7 +837,7 @@ function exportData(){let b=new Blob([JSON.stringify(S,null,2)],{type:'applicati
 function restoreData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{S=JSON.parse(r.result);save();refreshAll();alert('Backup restored successfully.')}catch{alert('Invalid backup file.')}};r.readAsText(f)}
 function resetData(){if(confirm('Remove all data?')){S={days:['Mon','Tue','Wed','Thu','Fri'],teachers:[],classes:[],subjects:[],allocations:[],schedule:{},substitutions:[]};save();refreshAll()}}
 function refreshStats(){stTeachers.textContent=S.teachers.length;stClasses.textContent=S.classes.length;stSubjects.textContent=S.subjects.length;stLessons.textContent=Object.values(S.schedule).reduce((n,x)=>n+Object.keys(x||{}).length,0)}
-function refreshAll(){S.classes.forEach(c=>{if(typeof c.classTeacher==='undefined')c.classTeacher=''});S.teachers.forEach(t=>{if(!Number(t.maxDaily)||Number(t.maxDaily)<1)t.maxDaily=99;if(typeof t.blocked==='undefined')t.blocked=''});fillSelectors();renderTeachers();renderClasses();renderClassTeachers();renderSubjects();renderAllocations();renderSubRecords();refreshStats()}
+function refreshAll(){S.classes.forEach(c=>{if(typeof c.classTeacher==='undefined')c.classTeacher=''});S.teachers.forEach(t=>{if(!Number(t.maxDaily)||Number(t.maxDaily)<1)t.maxDaily=99;if(!t.blockedSlots){t.blockedSlots=t.blocked?[{day:t.blocked.split('-P')[0],period:Number(t.blocked.split('-P')[1])}]:[]}});if(!S.fixedPeriods)S.fixedPeriods=[];fillSelectors();renderTeachers();renderClasses();renderClassTeachers();renderSubjects();renderAllocations();renderFixedPeriods();renderSubRecords();refreshStats()}
 load();refreshAll();
 </script>
 </body>
