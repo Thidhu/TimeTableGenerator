@@ -104,8 +104,7 @@ input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
  <button class="nav-item" aria-label="Subject Allocation" onclick="openPage('allocations',this)"><span class="nav-icon" title="Subject Allocation">🔗</span><span class="nav-label">Subject Allocation</span><span class="nav-arrow">›</span><span class="tooltip"><b>Subject Allocation</b>Assign subjects and weekly periods to teachers.</span></button>
  <button class="nav-item" aria-label="Fixed Periods" onclick="openPage('fixedPeriods',this)"><span class="nav-icon" title="Fixed Periods">📌</span><span class="nav-label">Fixed Periods</span><span class="nav-arrow">›</span><span class="tooltip"><b>Fixed Periods</b>Lock a period to the class teacher or a chosen subject, every day or on set days.</span></button>
  <button class="nav-item" aria-label="Generate Timetable" onclick="openPage('generate',this)"><span class="nav-icon" title="Generate Timetable">⚡</span><span class="nav-label">Generate Timetable</span><span class="nav-arrow">›</span><span class="tooltip"><b>Generate Timetable</b>Create a clash-free timetable automatically.</span></button>
- <button class="nav-item" aria-label="Preview Timetable" onclick="openPage('preview',this);renderPreview()"><span class="nav-icon" title="Preview Timetable">👁️</span><span class="nav-label">Preview Timetable</span><span class="nav-arrow">›</span><span class="tooltip"><b>Preview Timetable</b>Review and edit the generated timetable before saving.</span></button>
-  <button class="nav-item" aria-label="Substitution" onclick="openPage('substitution',this)"><span class="nav-icon" title="Substitution">🔄</span><span class="nav-label">Substitution</span><span class="nav-arrow">›</span><span class="tooltip"><b>Substitution</b>Find available teachers when someone is absent.</span></button>
+ <button class="nav-item" aria-label="Substitution" onclick="openPage('substitution',this)"><span class="nav-icon" title="Substitution">🔄</span><span class="nav-label">Substitution</span><span class="nav-arrow">›</span><span class="tooltip"><b>Substitution</b>Find available teachers when someone is absent.</span></button>
  <button class="nav-item" aria-label="Reports" onclick="openPage('reports',this)"><span class="nav-icon" title="Reports">📊</span><span class="nav-label">Reports</span><span class="nav-arrow">›</span><span class="tooltip"><b>Reports</b>View class, teacher and timetable reports.</span></button>
  <button class="nav-item" aria-label="Settings" onclick="openPage('settings',this)"><span class="nav-icon" title="Settings">⚙️</span><span class="nav-label">Settings</span><span class="nav-arrow">›</span><span class="tooltip"><b>Settings</b>Manage school days and timetable preferences.</span></button>
 </aside>
@@ -185,8 +184,9 @@ input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
 <div class="form-group"><label for="aTeacher">Teacher</label><select id="aTeacher"></select></div>
 <div class="form-group"><label for="aPeriods">Periods per Week</label><input id="aPeriods" type="number" value="5" min="1"></div>
 <div class="form-group"><label for="aResource">Shared Resource (Optional)</label><input id="aResource" placeholder="Example: ICT Lab"></div>
-<div class="form-group"><label>&nbsp;</label><button id="allocationSaveBtn" class="primary-btn" style="width:100%;padding:12px" onclick="addAllocation()">Add Allocation</button></div>
+<div class="form-group"><label>&nbsp;</label><button class="primary-btn" style="width:100%;padding:12px" onclick="addAllocation()">Add Allocation</button></div>
 </div>
+<div id="allocationMessage" aria-live="polite"></div>
 </div>
 <div class="card">
 <div class="toolbar"><div class="search"><span>⌕</span><input id="allocationSearch" oninput="renderAllocations()" placeholder="Search allocations..."></div></div>
@@ -204,8 +204,8 @@ input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
 <div class="form-group"><label for="fpPeriod">Period</label><input id="fpPeriod" type="number" min="1" value="1"></div>
 <div class="form-group"><label for="fpMode">Assign To</label><select id="fpMode" onchange="toggleFixedTeacherField()"><option value="classTeacher">Class Teacher</option><option value="specific">Specific Teacher</option></select></div>
 <div class="form-group" id="fpTeacherWrap" style="display:none"><label for="fpTeacher">Teacher</label><select id="fpTeacher"></select></div>
-<div class="form-group"><label for="fpSubject">Allocated Subject</label><select id="fpSubject"></select></div>
-<div class="form-group full"><button id="fixedSaveBtn" class="primary-btn" style="width:100%;padding:12px" onclick="addFixedPeriod()">Add Fixed Period</button></div>
+<div class="form-group"><label for="fpSubject">Subject / Label</label><input id="fpSubject" placeholder="Example: Roll Call, Assembly, Games"></div>
+<div class="form-group full"><button class="primary-btn" style="width:100%;padding:12px" onclick="addFixedPeriod()">Add Fixed Period</button></div>
 </div>
 </div>
 <div class="card">
@@ -214,10 +214,6 @@ input:focus,select:focus{outline:3px solid #e4efff;border-color:#85a9df}
 <div id="fixedPeriodTable"></div>
 </div>
 </section>
-
-<section id="preview" class="page">
-<div class="eyebrow">Review</div><div class="page-heading"><div><h2>Preview Timetable</h2><p>Review, edit and approve the generated timetable before replacing the saved timetable.</p></div><div class="toolbar"><button class="secondary-btn" onclick="renderPreview()">↻ Refresh Preview</button><button class="success-btn" onclick="acceptPreview()">✓ Accept & Save</button><button class="primary-btn" onclick="downloadPreviewExcel()">📥 Download Excel</button><button class="danger-btn" onclick="discardPreview()">Discard Preview</button></div></div>
-<div id="previewSummary"></div><div class="card"><div class="grid g2"><div class="form-group"><label>Preview by Class</label><select id="previewClass" onchange="renderPreview()"></select></div><div class="form-group"><label>Preview by Teacher</label><select id="previewTeacher" onchange="renderPreview()"></select></div></div></div><div class="card"><div id="previewArea" class="empty">Generate a timetable to see a preview.</div></div></section>
 
 <section id="generate" class="page">
 <div class="eyebrow">Automation</div><div class="page-heading"><div><h2>Generate Timetable</h2><p>Automatically create and check a timetable.</p></div></div>
@@ -336,7 +332,7 @@ function saveTeacher(){let name=tName.value.trim();if(!name)return alert('Enter 
 function teacherPage(delta){teacherCurrentPage+=delta;renderTeachers()}
 function renderTeachers(){
   let q=(document.getElementById('teacherSearch')?.value||'').toLowerCase();
-  let filtered=S.teachers.map((t,i)=>({...t,i})).filter(t=>t.name.toLowerCase().includes(q)||(t.subject||'').toLowerCase().includes(q));
+  let filtered=S.teachers.map((t,i)=>({...t,i})).filter(t=>t.name.toLowerCase().includes(q)||(t.subject||'').toLowerCase().includes(q)).reverse();
   let el=document.getElementById('teacherTable');
   let countEl=document.getElementById('teacherCount');
   let pageLabel=document.getElementById('teacherPageLabel');
@@ -395,7 +391,7 @@ function deleteClass(i){let c=S.classes[i];if(S.allocations.some(a=>a.className=
 function saveSubject(){let name=sName.value.trim();if(!name)return alert('Enter subject name.');if(S.subjects.includes(name))return alert('Subject already exists.');S.subjects.push(name);sName.value='';save();closeModal('subjectModal');refreshAll()}
 function renderSubjects(){
   let q=(document.getElementById('subjectSearch')?.value||'').toLowerCase();
-  let arr=S.subjects.map((s,i)=>({name:s,i})).filter(s=>s.name.toLowerCase().includes(q));
+  let arr=S.subjects.map((s,i)=>({name:s,i})).filter(s=>s.name.toLowerCase().includes(q)).reverse();
   let el=document.getElementById('subjectTable');
   el.innerHTML=arr.length?`<div class="table-wrap"><table><tr><th>#</th><th>Subject</th><th>Action</th></tr>${arr.map((s,n)=>`<tr><td>${n+1}</td><td><b>${esc(s.name)}</b></td><td><button class="icon-btn delete" aria-label="Delete subject ${esc(s.name)}" onclick="S.subjects.splice(${s.i},1);save();refreshAll()">🗑</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No subjects found.</div>';
 }
@@ -432,8 +428,8 @@ function deleteFixedPeriod(i){if(confirm('Remove this fixed period?')){S.fixedPe
 function renderFixedPeriods(){
   const el=document.getElementById('fixedPeriodTable');
   if(!el)return;
-  const list=S.fixedPeriods||[];
-  el.innerHTML=list.length?`<div class="table-wrap"><table><tr><th>Class</th><th>Day</th><th>Period</th><th>Subject</th><th>Teacher</th><th>Action</th></tr>${list.map((fp,i)=>{const teacher=resolveFixedTeacher(fp);return `<tr><td><span class="badge class">${esc(fp.className)}</span></td><td>${fp.day==='All'?'Every day':esc(fp.day)}</td><td>P${fp.period}</td><td><b>${esc(fp.subject)}</b></td><td>${teacher?esc(teacher):'<span class="muted">Class teacher not set</span>'}</td><td><button class="icon-btn delete" aria-label="Delete fixed period" onclick="deleteFixedPeriod(${i})">🗑</button></td></tr>`}).join('')}</table></div>`:'<div class="empty">No fixed periods set. Add one above, e.g. Period 1 every day → Class Teacher.</div>';
+  const list=(S.fixedPeriods||[]).map((fp,i)=>({...fp,i})).reverse();
+  el.innerHTML=list.length?`<div class="table-wrap"><table><tr><th>Class</th><th>Day</th><th>Period</th><th>Subject</th><th>Teacher</th><th>Action</th></tr>${list.map(fp=>{const teacher=resolveFixedTeacher(fp);return `<tr><td><span class="badge class">${esc(fp.className)}</span></td><td>${fp.day==='All'?'Every day':esc(fp.day)}</td><td>P${fp.period}</td><td><b>${esc(fp.subject)}</b></td><td>${teacher?esc(teacher):'<span class="muted">Class teacher not set</span>'}</td><td><button class="icon-btn delete" aria-label="Delete fixed period" onclick="deleteFixedPeriod(${fp.i})">🗑</button></td></tr>`}).join('')}</table></div>`:'<div class="empty">No fixed periods set. Add one above, e.g. Period 1 every day → Class Teacher.</div>';
 }
 // Builds a schedule pre-filled with all fixed periods, expanding "All" days into
 // the school's actual days, and flags any teacher double-bookings between rules.
@@ -485,10 +481,44 @@ function removeClassTeacher(i){
     refreshAll();
   }
 }
-function addAllocation(){let className=aClass.value,subject=aSubject.value,teacher=aTeacher.value,periods=Number(aPeriods.value),resource=aResource.value.trim();if(!className||!subject||!teacher||periods<1)return alert('Complete all fields.');S.allocations.push({className,subject,teacher,periodsPerWeek:periods,resource});aResource.value='';save();refreshAll()}
+function allocationMessage(html,type){const el=document.getElementById('allocationMessage');if(el)el.innerHTML=html?`<div class="notice ${type}">${html}</div>`:''}
+function addAllocation(){
+  let className=aClass.value,subject=aSubject.value,teacher=aTeacher.value,periods=Number(aPeriods.value),resource=aResource.value.trim();
+  if(!className||!subject||!teacher||periods<1)return alert('Complete all fields.');
+  allocationMessage('','');
+  // Exact same class+subject+teacher already allocated: merge into the existing
+  // entry (add the periods together) instead of creating a duplicate row.
+  let dup=S.allocations.find(a=>a.className===className&&a.subject===subject&&a.teacher===teacher);
+  if(dup){
+    dup.periodsPerWeek=Number(dup.periodsPerWeek)+periods;
+    if(resource)dup.resource=resource;
+    aResource.value='';
+    save();refreshAll();
+    allocationMessage(`This allocation already existed, so it was merged instead of duplicated. ${esc(teacher)} now teaches ${esc(subject)} to Class ${esc(className)} for <b>${dup.periodsPerWeek}</b> period(s)/week.`,'warn');
+    return;
+  }
+  const sameSubjectOtherTeacher=S.allocations.find(a=>a.className===className&&a.subject===subject&&a.teacher!==teacher);
+  S.allocations.push({className,subject,teacher,periodsPerWeek:periods,resource});
+  aResource.value='';
+  save();refreshAll();
+  let warnings=[];
+  if(sameSubjectOtherTeacher){
+    warnings.push(`${esc(subject)} is now allocated to Class ${esc(className)} by two different teachers (${esc(sameSubjectOtherTeacher.teacher)} and ${esc(teacher)}). Remove one if this wasn't intended.`);
+  }
+  const c=S.classes.find(x=>x.name===className);
+  if(c){
+    const totalAllocated=S.allocations.filter(a=>a.className===className).reduce((n,a)=>n+Number(a.periodsPerWeek),0);
+    const fixedCount=(S.fixedPeriods||[]).filter(fp=>fp.className===className).reduce((n,fp)=>n+(fp.day==='All'?S.days.length:1),0);
+    const available=Number(c.periodsPerDay||0)*S.days.length;
+    if(totalAllocated+fixedCount>available){
+      warnings.push(`Class ${esc(className)} now has ${totalAllocated+fixedCount} period(s)/week allocated (including fixed periods), but only ${available} are available. Some lessons may not be placed when generating.`);
+    }
+  }
+  if(warnings.length)allocationMessage(warnings.join('<br>'),'warn');
+}
 function renderAllocations(){
   let q=(document.getElementById('allocationSearch')?.value||'').toLowerCase();
-  let arr=S.allocations.map((a,i)=>({...a,i})).filter(a=>[a.className,a.subject,a.teacher,a.resource].join(' ').toLowerCase().includes(q));
+  let arr=S.allocations.map((a,i)=>({...a,i})).filter(a=>[a.className,a.subject,a.teacher,a.resource].join(' ').toLowerCase().includes(q)).reverse();
   let el=document.getElementById('allocationTable');
   el.innerHTML=arr.length?`<div class="table-wrap"><table><tr><th>Class</th><th>Subject</th><th>Teacher</th><th>Periods/Week</th><th>Resource</th><th>Action</th></tr>${arr.map(a=>`<tr><td>${esc(a.className)}</td><td><b>${esc(a.subject)}</b></td><td>${esc(a.teacher)}</td><td>${a.periodsPerWeek}</td><td>${esc(a.resource)||'—'}</td><td><button class="icon-btn delete" aria-label="Delete allocation" onclick="S.allocations.splice(${a.i},1);save();refreshAll()">🗑</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No allocations found.</div>';
 }
@@ -663,7 +693,7 @@ function showAbsentLesson(){
   subSuggestion.innerHTML=`<div class="notice ok"><b>Absent lesson:</b> Class ${esc(x.className)} · ${esc(x.subject)}<div class="table-wrap" style="margin-top:12px"><table><tr><th>Rank</th><th>Teacher</th><th>Subject Match</th><th>Weekly Load</th><th>Action</th></tr>${cand.map((q,i)=>`<tr><td>${i+1}</td><td><b>${esc(q.a.name)}</b></td><td>${q.match?'Yes':'No'}</td><td>${q.load}</td><td><button class="secondary-btn" onclick="assignSub('${q.a.name.replace(/'/g,"\\'")}','${t.replace(/'/g,"\\'")}','${d}',${p},'${x.className.replace(/'/g,"\\'")}','${x.subject.replace(/'/g,"\\'")}')">Assign</button></td></tr>`).join('')}</table></div>${!cand.length?'<div class="muted" style="margin-top:8px">No available teacher found within workload limits.</div>':''}</div>`;
 }
 function assignSub(sub,abs,day,period,className,subject){S.substitutions.push({substitute:sub,absent:abs,day,period,className,subject});save();renderSubRecords();alert(sub+' assigned successfully.')}
-function renderSubRecords(){let e=subRecords;if(!e)return;e.innerHTML=S.substitutions.length?`<div class="table-wrap"><table><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Substitute</th></tr>${S.substitutions.map(x=>`<tr><td>${esc(x.day)}</td><td>P${x.period}</td><td>${esc(x.className)}</td><td>${esc(x.subject)}</td><td>${esc(x.absent)}</td><td><b>${esc(x.substitute)}</b></td></tr>`).join('')}</table></div>`:'<div class="empty">No substitutions recorded.</div>'}
+function renderSubRecords(){let e=subRecords;if(!e)return;e.innerHTML=S.substitutions.length?`<div class="table-wrap"><table><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Substitute</th></tr>${S.substitutions.slice().reverse().map(x=>`<tr><td>${esc(x.day)}</td><td>P${x.period}</td><td>${esc(x.className)}</td><td>${esc(x.subject)}</td><td>${esc(x.absent)}</td><td><b>${esc(x.substitute)}</b></td></tr>`).join('')}</table></div>`:'<div class="empty">No substitutions recorded.</div>'}
 
 function renderClassReport(){
   let n=reportClass.value,c=S.classes.find(x=>x.name===n);
@@ -844,143 +874,6 @@ function resetData(){if(confirm('Remove all data?')){S={days:['Mon','Tue','Wed',
 function refreshStats(){stTeachers.textContent=S.teachers.length;stClasses.textContent=S.classes.length;stSubjects.textContent=S.subjects.length;stLessons.textContent=Object.values(S.schedule).reduce((n,x)=>n+Object.keys(x||{}).length,0)}
 function refreshAll(){S.classes.forEach(c=>{if(typeof c.classTeacher==='undefined')c.classTeacher=''});S.teachers.forEach(t=>{if(!Number(t.maxDaily)||Number(t.maxDaily)<1)t.maxDaily=99;if(!t.blockedSlots){t.blockedSlots=t.blocked?[{day:t.blocked.split('-P')[0],period:Number(t.blocked.split('-P')[1])}]:[]}});if(!S.fixedPeriods)S.fixedPeriods=[];fillSelectors();renderTeachers();renderClasses();renderClassTeachers();renderSubjects();renderAllocations();renderFixedPeriods();renderSubRecords();refreshStats()}
 load();refreshAll();
-</script>
-
-<script>
-let previewSchedule=null, allocationEditIndex=null, fixedEditIndex=null;
-function subjectColor(name){const colors=['#e8f0ff','#f1e9ff','#e9f8ef','#fff4df','#ffe9ef','#e8f8fa'];let n=0;for(const c of String(name))n+=c.charCodeAt(0);return colors[n%colors.length]}
-function fillFixedSubjects(){const cn=document.getElementById('fpClass')?.value;const mode=document.getElementById('fpMode')?.value;let teacher=mode==='classTeacher'?(S.classes.find(c=>c.name===cn)||{}).classTeacher:document.getElementById('fpTeacher')?.value;let subs=S.allocations.filter(a=>a.className===cn&&a.teacher===teacher).map(a=>a.subject);options('fpSubject',[...new Set(subs)],'No allocated subjects');}
-const _oldFillSelectors=fillSelectors; fillSelectors=function(){_oldFillSelectors();fillFixedSubjects();options('previewClass',S.classes.map(c=>c.name),'Select class');options('previewTeacher',S.teachers.map(t=>t.name),'Select teacher');};
-document.addEventListener('change',e=>{if(['fpClass','fpMode','fpTeacher'].includes(e.target.id))fillFixedSubjects();});
-function fixedCountForAllocation(a){return (S.fixedPeriods||[]).filter(fp=>fp.className===a.className&&fp.subject===a.subject&&resolveFixedTeacher(fp)===a.teacher).reduce((n,fp)=>n+(fp.day==='All'?S.days.length:1),0)}
-function addFixedPeriod(){const className=fpClass.value,day=fpDay.value,period=Number(fpPeriod.value),mode=fpMode.value,subject=fpSubject.value,teacher=fpTeacher.value;if(!className||!day||!period||!subject)return alert('Select class, day, period and an allocated subject.');const actual=mode==='classTeacher'?((S.classes.find(c=>c.name===className)||{}).classTeacher):teacher;if(!actual)return alert('Select or assign a teacher first.');if(!S.allocations.some(a=>a.className===className&&a.subject===subject&&a.teacher===actual))return alert('This subject is not allocated to the selected teacher for this class.');S.fixedPeriods=S.fixedPeriods||[];const obj={className,day,period,mode,subject,teacher:mode==='specific'?teacher:''};if(fixedEditIndex===null)S.fixedPeriods.unshift(obj);else S.fixedPeriods[fixedEditIndex]=obj;fixedEditIndex=null;document.getElementById('fixedSaveBtn').textContent='Add Fixed Period';save();refreshAll();}
-function editFixedPeriod(i){const fp=S.fixedPeriods[i];fixedEditIndex=i;fpClass.value=fp.className;fpDay.value=fp.day;fpPeriod.value=fp.period;fpMode.value=fp.mode;toggleFixedTeacherField();fpTeacher.value=resolveFixedTeacher(fp)||'';fillFixedSubjects();fpSubject.value=fp.subject;document.getElementById('fixedSaveBtn').textContent='Update Fixed Period';window.scrollTo({top:0,behavior:'smooth'});}
-renderFixedPeriods=function(){const el=document.getElementById('fixedPeriodTable');if(!el)return;const list=S.fixedPeriods||[];el.innerHTML=list.length?`<div class="table-wrap"><table><tr><th>Class</th><th>Day</th><th>Period</th><th>Subject</th><th>Teacher</th><th>Action</th></tr>${list.map((fp,i)=>{const teacher=resolveFixedTeacher(fp);return `<tr><td><span class="badge class">${esc(fp.className)}</span></td><td>${fp.day==='All'?'Every day':esc(fp.day)}</td><td>P${fp.period}</td><td><span class="badge" style="background:${subjectColor(fp.subject)};color:#334">${esc(fp.subject)}</span></td><td><b>${esc(teacher||'Not assigned')}</b></td><td><button class="icon-btn edit" onclick="editFixedPeriod(${i})">✎</button><button class="icon-btn delete" onclick="deleteFixedPeriod(${i})">🗑</button></td></tr>`}).join('')}</table></div>`:'<div class="empty">No fixed periods set.</div>';}
-function addAllocation(){let className=aClass.value,subject=aSubject.value,teacher=aTeacher.value,periods=Number(aPeriods.value),resource=aResource.value.trim();if(!className||!subject||!teacher||periods<1)return alert('Complete all fields.');let obj={className,subject,teacher,periodsPerWeek:periods,resource};if(allocationEditIndex===null)S.allocations.unshift(obj);else S.allocations[allocationEditIndex]=obj;allocationEditIndex=null;document.getElementById('allocationSaveBtn').textContent='Add Allocation';aResource.value='';save();refreshAll();}
-function editAllocation(i){let a=S.allocations[i];allocationEditIndex=i;aClass.value=a.className;aSubject.value=a.subject;aTeacher.value=a.teacher;aPeriods.value=a.periodsPerWeek;aResource.value=a.resource||'';document.getElementById('allocationSaveBtn').textContent='Update Allocation';window.scrollTo({top:0,behavior:'smooth'});}
-renderAllocations=function(){let q=(document.getElementById('allocationSearch')?.value||'').toLowerCase();let arr=S.allocations.map((a,i)=>({...a,i})).filter(a=>[a.className,a.subject,a.teacher,a.resource].join(' ').toLowerCase().includes(q));let el=document.getElementById('allocationTable');el.innerHTML=arr.length?`<div class="table-wrap"><table><tr><th>Class</th><th>Subject</th><th>Teacher</th><th>Periods/Week</th><th>Fixed Count</th><th>Resource</th><th>Action</th></tr>${arr.map(a=>`<tr><td><span class="badge class">${esc(a.className)}</span></td><td><span class="badge" style="background:${subjectColor(a.subject)};color:#334">${esc(a.subject)}</span></td><td><span class="badge active">👨‍🏫 ${esc(a.teacher)}</span></td><td>${a.periodsPerWeek}</td><td>${fixedCountForAllocation(a)}</td><td>${esc(a.resource)||'—'}</td><td><button class="icon-btn edit" onclick="editAllocation(${a.i})">✎</button><button class="icon-btn delete" onclick="S.allocations.splice(${a.i},1);save();refreshAll()">🗑</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No allocations found.</div>';}
-async function generate(){const errors=validateBeforeGenerate();if(errors.length){message('<b>Cannot generate timetable:</b><br>'+errors.join('<br>'),'bad');return;}const requests=[];for(const a of S.allocations){const fixed=fixedCountForAllocation(a);const remaining=Math.max(0,Number(a.periodsPerWeek)-fixed);for(let i=0;i<remaining;i++)requests.push({...a});if(fixed>Number(a.periodsPerWeek))message(`Warning: ${esc(a.className)} ${esc(a.subject)} has more fixed periods than allocated.`,'warn');}const {base,issues}=buildFixedSchedule();if(issues.length){message(issues.join('<br>'),'bad');return;}let best=null,bestUnplaced=Infinity,attemptCount=Math.max(1,Math.min(2000,Number(attempts.value)||500));for(let attempt=0;attempt<attemptCount;attempt++){const schedule={};S.classes.forEach(c=>schedule[c.name]={...(base[c.name]||{})});const un=[];for(const a of [...requests].sort(()=>Math.random()-.5)){const c=S.classes.find(x=>x.name===a.className),t=T(a.teacher);let cand=classSlots(c).filter(sl=>!schedule[a.className][sl.key]&&!isTeacherBlocked(t,sl.day,sl.p)&&!teacherBusy(schedule,a.teacher,sl)&&!resourceBusy(schedule,a.resource||'',sl)&&loadDay(schedule,a.teacher,sl.day)<Number(t.maxDaily||99));cand.sort((x,y)=>(sameDaySubject(schedule,a.className,x.day,a.subject)-sameDaySubject(schedule,a.className,y.day,a.subject))+Math.random()-.5);if(!cand.length)un.push(a);else{let sl=cand[0];schedule[a.className][sl.key]={subject:a.subject,teacher:a.teacher,resource:a.resource||''};}}if(un.length<bestUnplaced){best=schedule;bestUnplaced=un.length;if(!un.length)break;}}previewSchedule=best;message(bestUnplaced?`Preview generated with ${bestUnplaced} unplaced lesson(s). Open Preview Timetable.`:'Preview generated successfully with all lessons placed. Open Preview Timetable.','ok');openPage('preview');renderPreview();}
-function previewData(){return previewSchedule||S.schedule;}
-function renderPreview(){const data=previewData(), area=document.getElementById('previewArea'),summary=document.getElementById('previewSummary');if(!data||!Object.keys(data).length){area.innerHTML='<div class="empty">Generate a timetable first.</div>';summary.innerHTML='';return;}let cn=previewClass.value||S.classes[0]?.name, teacher=previewTeacher.value;let lessons=Object.values(data).reduce((n,x)=>n+Object.keys(x||{}).length,0), clashes=0;let map={};S.classes.forEach(c=>Object.entries(data[c.name]||{}).forEach(([k,v])=>{if(v.teacher){let z=k+'|'+v.teacher;map[z]=(map[z]||0)+1}}));clashes=Object.values(map).filter(n=>n>1).length;summary.innerHTML=`<div class="grid g4"><div class="stat"><strong>${lessons}</strong><span>Lessons in Preview</span></div><div class="stat"><strong>${(S.fixedPeriods||[]).length}</strong><span>Fixed Rules</span></div><div class="stat"><strong>${clashes}</strong><span>Teacher Clashes</span></div><div class="stat"><strong>${previewSchedule?'Not Saved':'Saved'}</strong><span>Status</span></div></div>`;if(teacher){let rows=S.classes.map(c=>({c,entries:Object.entries(data[c.name]||{}).filter(([k,v])=>v.teacher===teacher)})).filter(x=>x.entries.length);area.innerHTML='<h3>'+esc(teacher)+' Timetable</h3>'+rows.map(({c,entries})=>`<h4>Class ${esc(c.name)}</h4><div class="table-wrap"><table><tr><th>Day</th><th>Period</th><th>Subject</th></tr>${entries.map(([k,v])=>{let [d,p]=k.split('-P');return `<tr><td>${d}</td><td>P${p}</td><td>${esc(v.subject)}</td></tr>`}).join('')}</table></div>`).join('');return;}let c=S.classes.find(x=>x.name===cn);if(!c)return;area.innerHTML=`<h3>Class ${esc(cn)} Timetable</h3><div class="table-wrap"><table class="timetable"><tr><th>Period</th>${S.days.map(d=>'<th>'+d+'</th>').join('')}</tr>${Array.from({length:c.periodsPerDay},(_,i)=>{let p=i+1;return `<tr><th>P${p}</th>${S.days.map(d=>{let x=data[cn]?.[K(d,p)];return `<td onclick="editPreviewCell('${esc(cn)}','${d}',${p})" style="cursor:pointer;background:${x?.fixed?'#fff4df':'#fff'}">${x?`<div class="lesson">${esc(x.subject)}</div><div class="teacher-small">${esc(x.teacher)}${x.fixed?' · Fixed':''}</div>`:'<span class="muted">Empty</span>'}</td>`}).join('')}</tr>`}).join('')}</table></div><p class="muted">Click a lesson cell to edit it.</p>`;}
-function editPreviewCell(cn,d,p){let data=previewData();let x=data[cn]?.[K(d,p)]||{subject:'',teacher:''};let subject=prompt('Subject:',x.subject);if(subject===null)return;let teacher=prompt('Teacher:',x.teacher);if(teacher===null)return;data[cn]=data[cn]||{};if(!subject.trim()){delete data[cn][K(d,p)];}else data[cn][K(d,p)]={subject:subject.trim(),teacher:teacher.trim(),resource:'',fixed:x.fixed||false};previewSchedule=data;renderPreview();}
-function acceptPreview(){if(!previewSchedule)return alert('There is no new preview to accept.');S.schedule=previewSchedule;previewSchedule=null;save();refreshAll();alert('Preview timetable accepted and saved successfully.');renderPreview();}
-function discardPreview(){if(!previewSchedule)return alert('There is no unsaved preview.');if(confirm('Discard the generated preview and keep the saved timetable?')){previewSchedule=null;renderPreview();}}
-function downloadPreviewExcel(){const data=previewData();if(!data||!Object.keys(data).length)return alert('No timetable available to download.');const wb=XLSX.utils.book_new();S.classes.forEach(c=>{let rows=[['Period',...S.days]];for(let p=1;p<=c.periodsPerDay;p++)rows.push(['P'+p,...S.days.map(d=>{let x=data[c.name]?.[K(d,p)];return x?x.subject+'\n'+x.teacher+(x.fixed?' (Fixed)':''):''}))]);let ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:12},...S.days.map(()=>({wch:22}))];XLSX.utils.book_append_sheet(wb,ws,('Class '+c.name).slice(0,31));});const summary=[['Class','Subject','Teacher','Allocated Periods','Fixed Periods']];S.allocations.forEach(a=>summary.push([a.className,a.subject,a.teacher,a.periodsPerWeek,fixedCountForAllocation(a)]));XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(summary),'Allocation Summary');XLSX.writeFile(wb,'Kyidsa_School_Timetable.xlsx');}
-
-// ===== Universal edit controls added for Kyidsa Timetable Manager =====
-let editClassIndex=null;
-let editSubjectIndex=null;
-
-showClassModal=function(i=null){
-  editClassIndex=i;
-  const c=i===null?{name:'',periodsPerDay:8}:S.classes[i];
-  document.getElementById('classModalTitle').textContent=i===null?'Add Class':'Edit Class';
-  cName.value=c.name||'';
-  cPeriods.value=c.periodsPerDay||8;
-  openModal('classModal');
-};
-
-saveClass=function(){
-  const name=cName.value.trim();
-  const periods=Number(cPeriods.value)||8;
-  if(!name)return alert('Enter class name.');
-  if(editClassIndex===null){
-    if(S.classes.some(c=>c.name.toLowerCase()===name.toLowerCase()))return alert('Class already exists.');
-    S.classes.unshift({name,periodsPerDay:periods,classTeacher:''});
-  }else{
-    const old=S.classes[editClassIndex].name;
-    if(S.classes.some((c,i)=>i!==editClassIndex&&c.name.toLowerCase()===name.toLowerCase()))return alert('Another class already uses this name.');
-    S.classes[editClassIndex].name=name;
-    S.classes[editClassIndex].periodsPerDay=periods;
-    S.allocations.forEach(a=>{if(a.className===old)a.className=name});
-    (S.fixedPeriods||[]).forEach(fp=>{if(fp.className===old)fp.className=name});
-    if(S.schedule[old]){S.schedule[name]=S.schedule[old];if(old!==name)delete S.schedule[old];}
-    if(S.previewSchedule&&S.previewSchedule[old]){S.previewSchedule[name]=S.previewSchedule[old];if(old!==name)delete S.previewSchedule[old];}
-  }
-  editClassIndex=null;
-  save();closeModal('classModal');refreshAll();
-};
-
-renderClasses=function(){
-  const q=(document.getElementById('classSearch')?.value||'').toLowerCase();
-  const arr=S.classes.map((c,i)=>({...c,i})).filter(c=>c.name.toLowerCase().includes(q)||(c.classTeacher||'').toLowerCase().includes(q));
-  classTable.innerHTML=arr.length?`<div class="table-wrap"><table><tr><th>#</th><th>Class</th><th>Class Teacher</th><th>Periods / Day</th><th>Actions</th></tr>${arr.map((c,n)=>`<tr><td>${n+1}</td><td><span class="badge class">${esc(c.name)}</span></td><td><b>${c.classTeacher?esc(c.classTeacher):'<span class="muted">Not assigned</span>'}</b></td><td>${c.periodsPerDay}</td><td><button class="icon-btn edit" title="Edit class" onclick="showClassModal(${c.i})">✎</button><button class="icon-btn delete" title="Delete class" onclick="deleteClass(${c.i})">🗑</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No classes found.</div>';
-};
-
-showSubjectModal=function(i=null){
-  editSubjectIndex=i;
-  const s=i===null?'':S.subjects[i];
-  document.getElementById('subjectModalTitle').textContent=i===null?'Add Subject':'Edit Subject';
-  sName.value=s||'';
-  openModal('subjectModal');
-};
-
-saveSubject=function(){
-  const name=sName.value.trim();
-  if(!name)return alert('Enter subject name.');
-  if(editSubjectIndex===null){
-    if(S.subjects.some(s=>s.toLowerCase()===name.toLowerCase()))return alert('Subject already exists.');
-    S.subjects.unshift(name);
-  }else{
-    const old=S.subjects[editSubjectIndex];
-    if(S.subjects.some((s,i)=>i!==editSubjectIndex&&s.toLowerCase()===name.toLowerCase()))return alert('Another subject already uses this name.');
-    S.subjects[editSubjectIndex]=name;
-    S.allocations.forEach(a=>{if(a.subject===old)a.subject=name});
-    (S.fixedPeriods||[]).forEach(fp=>{if(fp.subject===old)fp.subject=name});
-    [S.schedule,S.previewSchedule].forEach(sc=>{if(sc)Object.values(sc).forEach(row=>Object.values(row||{}).forEach(x=>{if(x&&x.subject===old)x.subject=name}))});
-  }
-  editSubjectIndex=null;
-  save();closeModal('subjectModal');refreshAll();
-};
-
-renderSubjects=function(){
-  const q=(document.getElementById('subjectSearch')?.value||'').toLowerCase();
-  const arr=S.subjects.map((s,i)=>({name:s,i})).filter(s=>s.name.toLowerCase().includes(q));
-  subjectTable.innerHTML=arr.length?`<div class="table-wrap"><table><tr><th>#</th><th>Subject</th><th>Actions</th></tr>${arr.map((s,n)=>`<tr><td>${n+1}</td><td><span class="badge" style="background:${subjectColor(s.name)};color:#334">${esc(s.name)}</span></td><td><button class="icon-btn edit" title="Edit subject" onclick="showSubjectModal(${s.i})">✎</button><button class="icon-btn delete" title="Delete subject" onclick="deleteSubject(${s.i})">🗑</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No subjects found.</div>';
-};
-
-function deleteSubject(i){
-  const subject=S.subjects[i];
-  if(S.allocations.some(a=>a.subject===subject))return alert('This subject is used in subject allocations. Edit or remove those allocations first.');
-  if((S.fixedPeriods||[]).some(fp=>fp.subject===subject))return alert('This subject is used in fixed periods. Edit or remove those fixed periods first.');
-  if(confirm('Remove '+subject+'?')){S.subjects.splice(i,1);save();refreshAll();}
-}
-
-function editClassTeacher(i){
-  const c=S.classes[i];
-  if(!c)return;
-  ctClass.value=c.name;
-  ctTeacher.value=c.classTeacher||'';
-  document.getElementById('classTeachers').scrollIntoView({behavior:'smooth',block:'start'});
-  setTimeout(()=>ctTeacher.focus(),350);
-}
-
-renderClassTeachers=function(){
-  const el=document.getElementById('classTeacherTable');
-  if(!el)return;
-  if(!S.classes.length){el.innerHTML='<div class="empty">No classes added yet.</div>';return;}
-  el.innerHTML=`<div class="table-wrap"><table><tr><th>#</th><th>Class</th><th>Class Teacher</th><th>Status</th><th>Actions</th></tr>${S.classes.map((c,i)=>`<tr><td>${i+1}</td><td><span class="badge class">${esc(c.name)}</span></td><td><b>${c.classTeacher?esc(c.classTeacher):'Not assigned'}</b></td><td>${c.classTeacher?'<span class="badge active">Assigned</span>':'<span class="badge" style="background:#fff8e8;color:#a36b0b">Pending</span>'}</td><td><button class="icon-btn edit" title="Edit class teacher" onclick="editClassTeacher(${i})">✎</button>${c.classTeacher?`<button class="secondary-btn" onclick="removeClassTeacher(${i})">Remove</button>`:''}</td></tr>`).join('')}</table></div>`;
-};
-
-function editSubstitution(i){
-  const x=S.substitutions[i];
-  if(!x)return;
-  const substitute=prompt('Edit substitute teacher:',x.substitute);
-  if(substitute===null)return;
-  const teacher=S.teachers.find(t=>t.name.toLowerCase()===substitute.trim().toLowerCase());
-  if(!teacher)return alert('Please enter an existing teacher name.');
-  x.substitute=teacher.name;
-  save();refreshAll();
-}
-
-renderSubRecords=function(){
-  const e=document.getElementById('subRecords');
-  if(!e)return;
-  const arr=(S.substitutions||[]).map((x,i)=>({...x,i})).reverse();
-  e.innerHTML=arr.length?`<div class="table-wrap"><table><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Substitute</th><th>Actions</th></tr>${arr.map(x=>`<tr><td>${esc(x.day)}</td><td>P${x.period}</td><td><span class="badge class">${esc(x.className)}</span></td><td>${esc(x.subject)}</td><td>${esc(x.absent)}</td><td><b>${esc(x.substitute)}</b></td><td><button class="icon-btn edit" title="Edit substitution" onclick="editSubstitution(${x.i})">✎</button><button class="icon-btn delete" title="Delete substitution" onclick="S.substitutions.splice(${x.i},1);save();refreshAll()">🗑</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No substitutions recorded.</div>';
-};
-// ===== End universal edit controls =====
-
 </script>
 </body>
 </html>
